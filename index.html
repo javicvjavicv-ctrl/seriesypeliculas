@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0A0A0F">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>StreamFinder — Series &amp; Películas</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --prime: #00A8E1; --hbo: #9B59B6; --both: #E8C547;
+    --bg: #0A0A0F; --surface: #12121A; --surface2: #1C1C28;
+    --border: rgba(255,255,255,0.07); --text: #F0EEE8; --muted: #7A7A8A;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { height:100%; overflow:hidden; }
+  /* iOS Safari: prevent body scroll bounce while allowing inner scroll */
+  body { -webkit-overflow-scrolling:touch; }
+  .scroll-area, .detail-view { -webkit-overflow-scrolling:touch; }
+  body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif; }
+  body::before {
+    content:''; position:fixed; top:-20%; left:-10%; width:55%; height:55%;
+    background:radial-gradient(ellipse, rgba(0,168,225,0.07) 0%, transparent 70%);
+    pointer-events:none; z-index:0;
+  }
+  body::after {
+    content:''; position:fixed; bottom:-20%; right:-10%; width:55%; height:55%;
+    background:radial-gradient(ellipse, rgba(155,89,182,0.07) 0%, transparent 70%);
+    pointer-events:none; z-index:0;
+  }
+  .app {
+    position:relative; z-index:1; height:100vh; height:100dvh;
+    max-width:800px; margin:0 auto; padding:0 24px;
+    padding-left:max(24px, env(safe-area-inset-left));
+    padding-right:max(24px, env(safe-area-inset-right));
+    display:flex; flex-direction:column;
+  }
+
+  /* HEADER */
+  header {
+    flex-shrink:0; padding:16px 0 14px;
+    display:flex; align-items:center; justify-content:space-between;
+    border-bottom:1px solid var(--border);
+  }
+  .logo { display:flex; align-items:center; gap:9px; cursor:pointer; }
+  .logo-dots { display:flex; gap:5px; }
+  .dot { width:7px; height:7px; border-radius:50%; }
+  .dot-prime { background:var(--prime); box-shadow:0 0 8px var(--prime); }
+  .dot-hbo   { background:var(--hbo);   box-shadow:0 0 8px var(--hbo); }
+  h1 { font-family:'Playfair Display',serif; font-size:1.35rem; font-weight:700; line-height:1; }
+  h1 span { font-style:italic; }
+  .header-right { display:flex; align-items:center; gap:10px; }
+  .badges { display:flex; gap:7px; }
+  .badge {
+    display:flex; align-items:center; gap:5px;
+    padding:3px 9px; border-radius:20px;
+    font-size:0.68rem; font-weight:500; letter-spacing:0.05em;
+    text-transform:uppercase; border:1px solid;
+  }
+  .badge-prime { border-color:rgba(0,168,225,0.35); color:var(--prime); background:rgba(0,168,225,0.06); }
+  .badge-hbo   { border-color:rgba(155,89,182,0.35); color:var(--hbo);  background:rgba(155,89,182,0.06); }
+  .badge-dot { width:4px; height:4px; border-radius:50%; }
+  .badge-prime .badge-dot { background:var(--prime); }
+  .badge-hbo   .badge-dot { background:var(--hbo); }
+  .list-btn {
+    display:flex; align-items:center; gap:6px;
+    background:var(--surface); border:1px solid var(--border);
+    color:var(--text); border-radius:8px; padding:0 12px; height:32px;
+    font-family:'DM Sans',sans-serif; font-size:0.78rem; font-weight:500;
+    cursor:pointer; transition:all 0.18s; white-space:nowrap;
+  }
+  .list-btn:hover { border-color:rgba(255,255,255,0.18); background:var(--surface2); }
+  .list-btn.active { border-color:rgba(232,197,71,0.45); color:var(--both); background:rgba(232,197,71,0.05); }
+  .list-count {
+    background:var(--both); color:#000; border-radius:10px;
+    padding:1px 6px; font-size:0.68rem; font-weight:700;
+    min-width:18px; text-align:center; display:none;
+  }
+  .list-count.visible { display:inline-block; }
+
+  /* SEARCH */
+  .search-section { flex-shrink:0; padding:12px 0; border-bottom:1px solid var(--border); }
+  .input-row { display:grid; grid-template-columns:1fr 1fr auto auto; gap:8px; align-items:center; }
+  .input-row input { grid-column:1 / 3; }
+  .type-filter {
+    display:flex; gap:4px; background:var(--surface); border:1px solid var(--border);
+    border-radius:8px; padding:3px; height:40px; align-items:center;
+  }
+  .type-btn {
+    background:transparent; border:none; border-radius:5px;
+    color:var(--muted); font-family:'DM Sans',sans-serif; font-size:0.78rem; font-weight:500;
+    padding:0 10px; height:100%; cursor:pointer; transition:all 0.18s; white-space:nowrap;
+  }
+  .type-btn:hover { color:var(--text); }
+  .type-btn.active { background:var(--surface2); color:var(--text); }
+  .type-btn.active-serie { color:var(--prime); }
+  .type-btn.active-film  { color:var(--hbo); }
+  input[type="text"] {
+    flex:1; background:var(--surface); border:1px solid var(--border);
+    border-radius:8px; padding:10px 14px; color:var(--text);
+    font-family:'DM Sans',sans-serif; font-size:0.9rem; height:40px;
+    transition:border-color 0.2s;
+  }
+  input::placeholder { color:var(--muted); }
+  input:focus { outline:none; border-color:rgba(232,197,71,0.4); }
+  .search-btn {
+    background:linear-gradient(135deg, var(--prime), var(--hbo));
+    color:white; border:none; border-radius:8px; padding:0 14px;
+    font-family:'DM Sans',sans-serif; font-size:0.85rem; font-weight:500;
+    cursor:pointer; height:40px; width:100%; transition:opacity 0.2s, transform 0.1s;
+    white-space:nowrap; min-width:0;
+  }
+  .search-btn:hover { opacity:0.85; }
+  .search-btn:active { transform:scale(0.97); }
+  .search-btn:disabled { opacity:0.35; cursor:not-allowed; }
+
+  /* MAIN */
+  .main { flex:1; min-height:0; display:flex; flex-direction:column; }
+
+  /* WELCOME */
+  .welcome { flex:1; min-height:0; display:flex; flex-direction:column; padding:14px 0 16px; }
+  .welcome-label {
+    font-size:0.68rem; font-weight:500; letter-spacing:0.1em;
+    text-transform:uppercase; color:var(--muted); margin-bottom:10px; flex-shrink:0;
+  }
+  .welcome-grid {
+    flex:1; min-height:0; display:grid;
+    grid-template-columns:repeat(3,1fr); grid-template-rows:repeat(2,1fr); gap:8px;
+  }
+  .welcome-card {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:10px; padding:0 16px; cursor:pointer; transition:all 0.18s;
+    display:flex; align-items:center; gap:12px; min-width:0; overflow:hidden;
+  }
+  .welcome-card:hover { border-color:rgba(255,255,255,0.15); background:var(--surface2); }
+  .welcome-card-icon { font-size:1.4rem; flex-shrink:0; }
+  .welcome-card-text { min-width:0; overflow:hidden; }
+  .welcome-card-title { font-size:0.85rem; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .welcome-card-desc  { font-size:0.72rem; color:var(--muted); margin-top:3px; line-height:1.3; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+  /* SCROLL AREAS */
+  .scroll-area {
+    flex:1; min-height:0; overflow-y:auto; padding:14px 0 16px;
+    scrollbar-width:thin; scrollbar-color:var(--surface2) transparent; display:none;
+    overscroll-behavior:contain;
+  }
+  .scroll-area::-webkit-scrollbar { width:4px; }
+  .scroll-area::-webkit-scrollbar-track { background:transparent; }
+  .scroll-area::-webkit-scrollbar-thumb { background:var(--surface2); border-radius:4px; }
+  .section-title {
+    font-family:'Playfair Display',serif; font-size:1rem;
+    font-weight:400; font-style:italic; color:var(--muted); margin-bottom:10px;
+  }
+  .sort-bar {
+    display:flex; align-items:center; gap:6px; margin-bottom:12px; flex-wrap:wrap;
+  }
+  .sort-label { font-size:0.72rem; color:var(--muted); margin-right:2px; }
+  .sort-btn {
+    background:transparent; border:1px solid var(--border);
+    color:var(--muted); border-radius:6px; padding:3px 10px;
+    font-family:'DM Sans',sans-serif; font-size:0.75rem; font-weight:500;
+    cursor:pointer; transition:all 0.18s;
+  }
+  .sort-btn:hover { border-color:rgba(255,255,255,0.2); color:var(--text); }
+  .sort-btn.active { background:var(--surface2); border-color:rgba(255,255,255,0.18); color:var(--text); }
+
+  .loading { display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; gap:14px; }
+  .film-reel {
+    width:36px; height:36px; border:2px solid var(--border);
+    border-top-color:var(--prime); border-right-color:var(--hbo);
+    border-radius:50%; animation:spin 0.9s linear infinite;
+  }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .loading p { color:var(--muted); font-size:0.85rem; font-style:italic; }
+
+  /* SERIES CARDS */
+  .series-grid { display:grid; gap:8px; }
+  .series-card {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:10px; padding:12px 14px;
+    display:grid; grid-template-columns:1fr auto;
+    gap:10px; align-items:start;
+    transition:border-color 0.2s, transform 0.15s;
+    animation:fadeUp 0.3s ease both;
+  }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+  .series-card:hover { border-color:rgba(255,255,255,0.13); transform:translateY(-1px); }
+  .series-card:nth-child(1) { animation-delay:0.03s; }
+  .series-card:nth-child(2) { animation-delay:0.06s; }
+  .series-card:nth-child(3) { animation-delay:0.09s; }
+  .series-card:nth-child(4) { animation-delay:0.12s; }
+  .series-card:nth-child(5) { animation-delay:0.15s; }
+  .series-card:nth-child(6) { animation-delay:0.18s; }
+  .series-card:nth-child(7) { animation-delay:0.21s; }
+  .series-card:nth-child(8) { animation-delay:0.24s; }
+  .series-card:nth-child(9) { animation-delay:0.27s; }
+  .series-card:nth-child(10) { animation-delay:0.30s; }
+  .series-card:nth-child(11) { animation-delay:0.33s; }
+  .series-card:nth-child(12) { animation-delay:0.36s; }
+  .series-card:nth-child(13) { animation-delay:0.39s; }
+  .series-card:nth-child(14) { animation-delay:0.42s; }
+  .series-card:nth-child(15) { animation-delay:0.45s; }
+  .series-card:nth-child(16) { animation-delay:0.48s; }
+  .series-card:nth-child(17) { animation-delay:0.51s; }
+  .series-card:nth-child(18) { animation-delay:0.54s; }
+  .series-card:nth-child(19) { animation-delay:0.57s; }
+  .series-card:nth-child(20) { animation-delay:0.60s; }
+  .series-card:nth-child(21) { animation-delay:0.63s; }
+  .series-card:nth-child(22) { animation-delay:0.66s; }
+  .series-card:nth-child(23) { animation-delay:0.69s; }
+  .series-card:nth-child(24) { animation-delay:0.72s; }
+  .series-card:nth-child(25) { animation-delay:0.75s; }
+  .series-card:nth-child(26) { animation-delay:0.78s; }
+  .series-card:nth-child(27) { animation-delay:0.80s; }
+  .series-card:nth-child(28) { animation-delay:0.80s; }
+  .series-card:nth-child(29) { animation-delay:0.80s; }
+  .series-card:nth-child(30) { animation-delay:0.80s; }
+  .series-card:nth-child(31) { animation-delay:0.80s; }
+  .series-card:nth-child(32) { animation-delay:0.80s; }
+  .series-card:nth-child(33) { animation-delay:0.80s; }
+  .series-card:nth-child(34) { animation-delay:0.80s; }
+  .series-card:nth-child(35) { animation-delay:0.80s; }
+  .series-card:nth-child(36) { animation-delay:0.80s; }
+  .series-card:nth-child(37) { animation-delay:0.80s; }
+  .series-card:nth-child(38) { animation-delay:0.80s; }
+  .series-card:nth-child(39) { animation-delay:0.80s; }
+  .series-card:nth-child(40) { animation-delay:0.80s; }
+  .series-card:nth-child(41) { animation-delay:0.80s; }
+  .series-card:nth-child(42) { animation-delay:0.80s; }
+  .series-card:nth-child(43) { animation-delay:0.80s; }
+  .series-card:nth-child(44) { animation-delay:0.80s; }
+  .series-card:nth-child(45) { animation-delay:0.80s; }
+  .series-card:nth-child(46) { animation-delay:0.80s; }
+  .series-card:nth-child(47) { animation-delay:0.80s; }
+  .series-card:nth-child(48) { animation-delay:0.80s; }
+  .series-card:nth-child(49) { animation-delay:0.80s; }
+  .series-card:nth-child(50) { animation-delay:0.80s; }
+  .series-main { min-width:0; }
+  .series-header { display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; margin-bottom:4px; }
+  .series-title { font-family:'Playfair Display',serif; font-size:0.98rem; font-weight:700; }
+  .series-year  { color:var(--muted); font-size:0.75rem; }
+  .series-meta { display:flex; gap:5px; flex-wrap:wrap; margin-bottom:5px; }
+  .meta-tag {
+    font-size:0.67rem; font-weight:500; letter-spacing:0.03em;
+    padding:2px 7px; border-radius:10px;
+    background:var(--surface2); color:var(--muted); border:1px solid var(--border);
+  }
+  .series-desc { font-size:0.8rem; color:rgba(240,238,232,0.7); line-height:1.55; }
+  .series-seasons { font-size:0.67rem; font-weight:500; letter-spacing:0.03em; padding:2px 7px; border-radius:10px; background:rgba(232,197,71,0.07); color:var(--both); border:1px solid rgba(232,197,71,0.2); }
+  .series-right { display:flex; flex-direction:column; align-items:flex-end; gap:6px; flex-shrink:0; }
+  .platform-pill {
+    font-size:0.67rem; font-weight:600; letter-spacing:0.05em;
+    text-transform:uppercase; padding:3px 9px; border-radius:20px; white-space:nowrap;
+  }
+  .pill-prime { background:rgba(0,168,225,0.1); color:var(--prime); border:1px solid rgba(0,168,225,0.22); }
+  .pill-hbo   { background:rgba(155,89,182,0.1); color:var(--hbo);  border:1px solid rgba(155,89,182,0.22); }
+  .pill-both  { background:rgba(232,197,71,0.08); color:var(--both); border:1px solid rgba(232,197,71,0.22); }
+  .platform-link { text-decoration:none; cursor:pointer; transition:opacity 0.18s, transform 0.18s; display:inline-block; }
+  .platform-link:hover { opacity:0.75; transform:translateY(-1px); }
+  .ratings-area { display:flex; flex-direction:column; align-items:flex-end; gap:3px; }
+  .rating { font-size:0.75rem; color:var(--both); font-weight:500; }
+  .type-badge { font-size:0.67rem; font-weight:500; letter-spacing:0.03em; padding:2px 7px; border-radius:10px; white-space:nowrap; }
+  .type-serie  { background:rgba(0,168,225,0.07); color:var(--prime); border:1px solid rgba(0,168,225,0.18); }
+  .type-film   { background:rgba(155,89,182,0.07); color:var(--hbo);  border:1px solid rgba(155,89,182,0.18); }
+
+  /* DETAIL VIEW — fullscreen, inside .main flow */
+  .detail-view {
+    flex:1; min-height:0; overflow-y:auto; padding:0;
+    display:none; flex-direction:column;
+    scrollbar-width:thin; scrollbar-color:var(--surface2) transparent;
+    animation:fadeUp 0.25s ease both;
+    overscroll-behavior:contain;
+  }
+  .detail-view::-webkit-scrollbar { width:4px; }
+  .detail-view::-webkit-scrollbar-thumb { background:var(--surface2); border-radius:4px; }
+  .detail-view.open { display:flex; }
+
+  .dp-topbar {
+    flex-shrink:0; padding:14px 0 12px;
+    display:flex; align-items:center; justify-content:space-between;
+    border-bottom:1px solid var(--border); margin-bottom:24px;
+  }
+  .dp-back {
+    background:transparent; border:none; color:var(--muted);
+    font-family:'DM Sans',sans-serif; font-size:0.82rem;
+    cursor:pointer; display:flex; align-items:center; gap:6px;
+    transition:color 0.15s; padding:0;
+  }
+  .dp-back:hover { color:var(--text); }
+  .dp-actions { display:flex; gap:8px; align-items:center; }
+
+  .dp-hero {
+    display:grid; grid-template-columns:auto 1fr;
+    gap:28px; align-items:start; margin-bottom:32px;
+  }
+  .dp-platform-wrap {
+    display:flex; flex-direction:column; gap:10px; flex-shrink:0; align-items:flex-start;
+  }
+  .dp-info { min-width:0; }
+  .dp-title {
+    font-family:'Playfair Display',serif;
+    font-size:clamp(1.4rem, 3vw, 2rem);
+    font-weight:700; line-height:1.2; margin-bottom:10px;
+  }
+  .dp-meta-row { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:16px; }
+  .dp-year  { color:var(--muted); font-size:0.85rem; }
+  .dp-rating-hero { font-size:0.85rem; font-weight:600; color:var(--both); }
+
+  .dp-columns {
+    display:grid; grid-template-columns:1fr 1fr;
+    gap:24px; padding-bottom:40px;
+  }
+  @media (max-width:600px) { .dp-columns { grid-template-columns:1fr; } .dp-hero { grid-template-columns:1fr; } }
+
+  .dp-col { display:flex; flex-direction:column; gap:24px; }
+
+  .dp-section { }
+  .dp-section-title {
+    font-size:0.66rem; font-weight:600; letter-spacing:0.12em;
+    text-transform:uppercase; color:var(--muted); margin-bottom:10px;
+  }
+  .dp-text { font-size:0.88rem; color:rgba(240,238,232,0.82); line-height:1.75; }
+  .dp-cast { display:flex; flex-wrap:wrap; gap:6px; }
+  .dp-cast-chip {
+    font-size:0.75rem; padding:4px 11px; border-radius:12px;
+    background:var(--surface2); color:var(--text); border:1px solid var(--border);
+  }
+  .dp-seasons { display:flex; flex-direction:column; gap:8px; }
+  .dp-season {
+    background:var(--surface2); border:1px solid var(--border);
+    border-radius:8px; padding:12px 14px;
+  }
+  .dp-season-title { font-size:0.82rem; font-weight:600; margin-bottom:4px; }
+  .dp-season-desc  { font-size:0.78rem; color:var(--muted); line-height:1.55; }
+  .dp-similar { display:flex; flex-direction:column; }
+  .dp-similar-item {
+    font-size:0.84rem; color:rgba(240,238,232,0.82); padding:8px 0;
+    border-bottom:1px solid var(--border);
+    display:flex; justify-content:space-between; align-items:center; gap:8px;
+  }
+  .dp-similar-item:last-child { border-bottom:none; }
+  .dp-trailer-btn {
+    display:inline-flex; align-items:center; gap:8px;
+    background:rgba(255,0,0,0.1); color:#FF5555;
+    border:1px solid rgba(255,0,0,0.2); border-radius:8px;
+    padding:9px 18px; font-family:'DM Sans',sans-serif;
+    font-size:0.85rem; font-weight:500; text-decoration:none;
+    transition:all 0.18s;
+  }
+  .dp-trailer-btn:hover { background:rgba(255,0,0,0.18); }
+  .dp-awards { font-size:0.85rem; color:var(--both); line-height:1.6; }
+  .dp-loading {
+    display:flex; flex-direction:column; align-items:center;
+    justify-content:center; flex:1; gap:14px; min-height:300px;
+  }
+  .dp-loading p { color:var(--muted); font-size:0.85rem; font-style:italic; }
+
+  /* SAVE BUTTON */
+  .save-btn {
+    background:transparent; border:1px solid var(--border); color:var(--muted);
+    border-radius:6px; width:28px; height:28px;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer; transition:all 0.18s; font-size:0.9rem; flex-shrink:0; line-height:1;
+  }
+  .save-btn:hover { border-color:rgba(232,197,71,0.5); color:var(--both); }
+  .save-btn.saved { background:rgba(232,197,71,0.1); border-color:rgba(232,197,71,0.4); color:var(--both); }
+
+  /* EMPTY STATE */
+  .message-box {
+    display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    height:100%; gap:10px; color:var(--muted);
+  }
+  .message-box .msg-icon { font-size:2rem; opacity:0.35; }
+  .message-box p { font-style:italic; font-size:0.9rem; text-align:center; line-height:1.6; }
+
+  /* ── MOBILE (≤480px) ─────────────────────────────────── */
+  @media (max-width: 480px) {
+
+    /* App container */
+    .app { padding:0 12px; }
+
+    /* Header: hide badges, tighten spacing */
+    header { padding:12px 0 10px; }
+    .badges { display:none; }
+    h1 { font-size:1.15rem; }
+    .list-btn { padding:0 10px; font-size:0.74rem; height:30px; }
+    .list-count { font-size:0.64rem; padding:1px 5px; }
+
+    /* Search: stack filter on second row */
+    .search-section { padding:10px 0; }
+    .input-row {
+      grid-template-columns: 1fr auto;
+      grid-template-rows: auto auto;
+      gap:7px;
+    }
+    .input-row input { grid-column:1 / 2; grid-row:1; }
+    .search-btn { grid-column:2 / 3; grid-row:1; width:auto; padding:0 14px; }
+    .type-filter { grid-column:1 / 3; grid-row:2; height:34px; justify-content:center; }
+    .type-btn { font-size:0.76rem; padding:0 14px; flex:1; text-align:center; }
+
+    /* Welcome grid: 2 cols × 3 rows */
+    .welcome-grid {
+      grid-template-columns:repeat(2,1fr);
+      grid-template-rows:repeat(3,1fr);
+    }
+    .welcome-card { padding:0 12px; gap:9px; }
+    .welcome-card-icon { font-size:1.2rem; }
+    .welcome-card-title { font-size:0.8rem; }
+    .welcome-card-desc { display:none; }
+
+    /* Results cards: single column, more compact */
+    .series-grid { gap:6px; }
+    .series-card { padding:10px 12px; gap:8px; }
+    .series-title { font-size:0.9rem; }
+    .series-desc { font-size:0.76rem; -webkit-line-clamp:2; display:-webkit-box; -webkit-box-orient:vertical; overflow:hidden; }
+    .meta-tag { font-size:0.63rem; padding:2px 6px; }
+    .series-seasons { font-size:0.63rem; padding:2px 6px; }
+    .platform-pill { font-size:0.63rem; padding:2px 7px; }
+    .type-badge { font-size:0.63rem; padding:2px 6px; }
+    .save-btn { width:26px; height:26px; font-size:0.82rem; }
+
+    /* Sort bar */
+    .sort-bar { gap:5px; }
+    .sort-btn { padding:3px 8px; font-size:0.72rem; }
+
+    /* Detail view */
+    .dp-topbar { padding:10px 0 9px; margin-bottom:16px; }
+    .dp-hero { grid-template-columns:1fr; gap:14px; margin-bottom:20px; }
+    .dp-platform-wrap { flex-direction:row; flex-wrap:wrap; align-items:center; gap:8px; }
+    .dp-title { font-size:1.25rem; }
+    .dp-columns { grid-template-columns:1fr; gap:18px; padding-bottom:24px; }
+    .dp-section-title { font-size:0.64rem; }
+    .dp-text { font-size:0.85rem; }
+    .dp-cast-chip { font-size:0.72rem; padding:3px 9px; }
+    .dp-season { padding:9px 12px; }
+    .dp-season-title { font-size:0.8rem; }
+    .dp-season-desc { font-size:0.75rem; }
+    .dp-trailer-btn { padding:8px 14px; font-size:0.82rem; }
+    .dp-similar-item { font-size:0.8rem; }
+    .section-title { font-size:0.92rem; }
+  }
+
+  /* ── SMALL-MEDIUM (481–640px) ─────────────────────────── */
+  @media (min-width:481px) and (max-width:640px) {
+    .app { padding:0 16px; }
+    .badges { display:none; }
+    .welcome-grid { grid-template-columns:repeat(2,1fr); grid-template-rows:repeat(3,1fr); }
+    .dp-columns { grid-template-columns:1fr; }
+    .dp-hero { grid-template-columns:1fr; }
+    .input-row { grid-template-columns:1fr auto; grid-template-rows:auto auto; gap:8px; }
+    .input-row input { grid-column:1; grid-row:1; }
+    .search-btn { grid-column:2; grid-row:1; width:auto; padding:0 14px; }
+    .type-filter { grid-column:1/3; grid-row:2; height:34px; justify-content:center; }
+  }
+
+  /* Touch targets: min 44px for interactive elements on mobile */
+  @media (hover:none) and (pointer:coarse) {
+    .save-btn { min-width:44px; min-height:44px; }
+    .search-btn { min-height:44px; }
+    .type-btn { min-height:38px; }
+    .sort-btn { min-height:36px; padding:6px 12px; }
+    .list-btn { min-height:36px; }
+    .dp-back { min-height:36px; padding:4px 0; }
+    .welcome-card { min-height:54px; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="logo" id="logoBtn">
+      <div class="logo-dots">
+        <div class="dot dot-prime"></div>
+        <div class="dot dot-hbo"></div>
+      </div>
+      <h1>Stream<span>Finder</span></h1>
+    </div>
+    <div class="header-right">
+      <div class="badges">
+        <div class="badge badge-prime"><div class="badge-dot"></div>Prime Video</div>
+        <div class="badge badge-hbo"><div class="badge-dot"></div>HBO Max</div>
+      </div>
+      <button class="list-btn" id="listBtn">
+        &#9733; Mi lista
+        <span class="list-count" id="listCount"></span>
+      </button>
+    </div>
+  </header>
+
+  <div class="search-section">
+    <div class="input-row">
+      <input type="text" id="query" placeholder="Ej: thriller político, película de ciencia ficción de los 80, comedia romántica…" />
+      <div class="type-filter">
+        <button class="type-btn active" data-type="all">Todos</button>
+        <button class="type-btn" data-type="serie">Series</button>
+        <button class="type-btn" data-type="film">Películas</button>
+      </div>
+      <button class="search-btn" id="searchBtn">Buscar &#8594;</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="welcome" id="welcomeState">
+      <p class="welcome-label">Explorar por categoría</p>
+      <div class="welcome-grid">
+        <div class="welcome-card" data-q="Series y películas de crimen y detectives muy adictivas">
+          <div class="welcome-card-icon">&#128269;</div>
+          <div class="welcome-card-text">
+            <div class="welcome-card-title">Crimen &amp; Detectives</div>
+            <div class="welcome-card-desc">Investigaciones que enganchan</div>
+          </div>
+        </div>
+        <div class="welcome-card" data-q="Series y películas de dramas históricos y épocas pasadas">
+          <div class="welcome-card-icon">&#127963;</div>
+          <div class="welcome-card-text">
+            <div class="welcome-card-title">Dramas Históricos</div>
+            <div class="welcome-card-desc">Épocas pasadas con gran producción</div>
+          </div>
+        </div>
+        <div class="welcome-card" data-q="Series y películas de comedias inteligentes y humor sofisticado">
+          <div class="welcome-card-icon">&#127917;</div>
+          <div class="welcome-card-text">
+            <div class="welcome-card-title">Comedia Inteligente</div>
+            <div class="welcome-card-desc">Humor con profundidad</div>
+          </div>
+        </div>
+        <div class="welcome-card" data-q="Series y películas de acción aventuras y superhéroes">
+          <div class="welcome-card-icon">&#9889;</div>
+          <div class="welcome-card-text">
+            <div class="welcome-card-title">Acción &amp; Aventura</div>
+            <div class="welcome-card-desc">Adrenalina y espectáculo</div>
+          </div>
+        </div>
+        <div class="welcome-card" data-q="Documentales y docuseries fascinantes">
+          <div class="welcome-card-icon">&#127916;</div>
+          <div class="welcome-card-text">
+            <div class="welcome-card-title">Docuseries</div>
+            <div class="welcome-card-desc">Realidad más rara que la ficción</div>
+          </div>
+        </div>
+        <div class="welcome-card" data-q="Series y películas de terror y horror psicológico">
+          <div class="welcome-card-icon">&#128065;</div>
+          <div class="welcome-card-text">
+            <div class="welcome-card-title">Terror &amp; Horror</div>
+            <div class="welcome-card-desc">Miedo que te persigue días después</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="scroll-area" id="results"></div>
+    <div class="scroll-area" id="myListArea"></div>
+    <div class="detail-view" id="detailView"></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  // ── Constants ────────────────────────────────────────
+  const STORAGE_KEY = 'streamfinder-saved';
+  const PLABEL = { prime: 'Prime Video', hbo: 'HBO Max', ambas: 'Prime & HBO' };
+  const PPILL  = { prime: 'pill-prime',  hbo: 'pill-hbo',  ambas: 'pill-both' };
+
+  // ── State ────────────────────────────────────────────
+  let savedList = [];
+  let viewingMyList = false;
+  let typeFilter = 'all';
+  let currentResults = [];
+  let currentSort = 'imdb';
+  const registry = {};
+  let seq = 0;
+
+  // ── DOM refs ─────────────────────────────────────────
+  const welcomeEl  = document.getElementById('welcomeState');
+  const resultsEl  = document.getElementById('results');
+  const myListEl   = document.getElementById('myListArea');
+  const listBtn    = document.getElementById('listBtn');
+  const listCount  = document.getElementById('listCount');
+  const searchBtn  = document.getElementById('searchBtn');
+  const queryInput = document.getElementById('query');
+  const logoBtn    = document.getElementById('logoBtn');
+
+  // ── Storage ──────────────────────────────────────────
+  async function loadSaved() {
+    try {
+      const res = await window.storage.get(STORAGE_KEY);
+      savedList = res ? JSON.parse(res.value) : [];
+    } catch (_) {
+      savedList = [];
+    }
+    updateBadge();
+  }
+
+  async function persistSaved() {
+    try { await window.storage.set(STORAGE_KEY, JSON.stringify(savedList)); } catch (_) {}
+  }
+
+  // ── Badge ────────────────────────────────────────────
+  function updateBadge() {
+    if (savedList.length > 0) {
+      listCount.textContent = savedList.length;
+      listCount.classList.add('visible');
+    } else {
+      listCount.classList.remove('visible');
+    }
+  }
+
+  function isSaved(title) {
+    return savedList.some(function (s) { return s.title === title; });
+  }
+
+  // ── Card builder ─────────────────────────────────────
+  function makeCard(s, i) {
+    // Reuse existing key so enrichment can always find this card
+    var key = 'k' + (++seq);
+    registry[key] = s;
+    var saved = isSaved(s.title);
+    var pill  = PPILL[s.platform]  || 'pill-prime';
+    var label = PLABEL[s.platform] || s.platform;
+
+    var div = document.createElement('div');
+    div.className = 'series-card';
+    div.style.animationDelay = (i * 0.05) + 's';
+
+    var genres = (s.genres || []).map(function (g) {
+      return '<span class="meta-tag">' + esc(g) + '</span>';
+    }).join('');
+
+    var ratingHTML = s.rating
+      ? '<span class="rating">&#9733; ' + esc(s.rating) + '</span>'
+      : '';
+    var seasonsHTML = (s.seasons || s.episodes)
+      ? '<span class="series-seasons">' +
+          (s.seasons ? s.seasons + ' temp.' : '') +
+          (s.seasons && s.episodes ? ' &middot; ' : '') +
+          (s.episodes ? s.episodes + ' ep.' : '') +
+        '</span>'
+      : '';
+
+    div.innerHTML =
+      '<div class="series-main">' +
+        '<div class="series-header">' +
+          '<span class="series-title detail-trigger" style="cursor:pointer;" data-key="' + key + '">' + esc(s.title) + '</span>' +
+          '<span class="series-year">'  + esc(s.year || '') + '</span>' +
+        '</div>' +
+        '<div class="series-meta">' + genres + (seasonsHTML ? ' ' + seasonsHTML : '') + '</div>' +
+        '<p class="series-desc">' + esc(s.description || '') + '</p>' +
+      '</div>' +
+      '<div class="series-right">' +
+        (s.type === 'pelicula' ? '<span class="type-badge type-film">&#127916; Película</span>' : '<span class="type-badge type-serie">&#127902; Serie</span>') +
+        (s.url
+          ? '<a class="platform-pill platform-link ' + pill + '" href="' + esc(s.url) + '" target="_blank" rel="noopener">' + esc(label) + ' &#8599;</a>'
+          : '<span class="platform-pill ' + pill + '">' + esc(label) + '</span>') +
+        '<div class="ratings-area">' + ratingHTML + '</div>' +
+        '<button class="save-btn' + (saved ? ' saved' : '') + '" ' +
+          'data-key="' + key + '" ' +
+          'title="' + (saved ? 'Quitar de Mi lista' : 'Guardar en Mi lista') + '">' +
+          (saved ? '&#9733;' : '&#9734;') +
+        '</button>' +
+      '</div>';
+
+    return div;
+  }
+
+  // ── Save handler ─────────────────────────────────────
+  function handleSave(btn) {
+    var s = registry[btn.dataset.key];
+    if (!s) return;
+    var idx = savedList.findIndex(function (x) { return x.title === s.title; });
+    if (idx === -1) {
+      savedList.push(s);
+      btn.classList.add('saved');
+      btn.innerHTML = '&#9733;';
+      btn.title = 'Quitar de Mi lista';
+    } else {
+      savedList.splice(idx, 1);
+      btn.classList.remove('saved');
+      btn.innerHTML = '&#9734;';
+      btn.title = 'Guardar en Mi lista';
+      if (viewingMyList) {
+        var card = btn.closest('.series-card');
+        card.style.transition = 'opacity 0.2s, transform 0.2s';
+        card.style.opacity = '0';
+        card.style.transform = 'translateX(8px)';
+        setTimeout(renderMyList, 220);
+      }
+    }
+    persistSaved();
+    updateBadge();
+  }
+
+  // Event delegation
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest('.save-btn[data-key]');
+    if (btn) { handleSave(btn); return; }
+    var trigger = e.target.closest('.detail-trigger[data-key]');
+    if (trigger) {
+      var item = registry[trigger.dataset.key];
+      if (item) openDetail(item, viewingMyList ? 'mylist' : 'results');
+    }
+  });
+
+  // ── Views ─────────────────────────────────────────────
+  function showWelcome() {
+    viewingMyList = false;
+    welcomeEl.style.display = 'flex';
+    resultsEl.style.display = 'none';
+    myListEl.style.display  = 'none';
+    detailView.classList.remove('open');
+    detailView.innerHTML = '';
+    currentDetailItem = null;
+    listBtn.classList.remove('active');
+  }
+
+  function toggleMyList() {
+    if (viewingMyList) { showWelcome(); return; }
+    viewingMyList = true;
+    welcomeEl.style.display = 'none';
+    resultsEl.style.display = 'none';
+    myListEl.style.display  = 'block';
+    listBtn.classList.add('active');
+    renderMyList();
+  }
+
+  function renderMyList() {
+    myListEl.innerHTML = '';
+    if (savedList.length === 0) {
+      myListEl.innerHTML =
+        '<div class="message-box">' +
+          '<div class="msg-icon">&#9733;</div>' +
+          '<p>Tu lista est&#225; vac&#237;a.<br>Pulsa &#9734; en cualquier resultado para guardar una serie.</p>' +
+        '</div>';
+      return;
+    }
+    var title = document.createElement('p');
+    title.className = 'section-title';
+    title.textContent = 'Mi lista — ' + savedList.length + ' serie' + (savedList.length !== 1 ? 's' : '') + ' guardada' + (savedList.length !== 1 ? 's' : '');
+    var grid = document.createElement('div');
+    grid.className = 'series-grid';
+    savedList.forEach(function (s, i) { grid.appendChild(makeCard(s, i)); });
+    myListEl.appendChild(title);
+    myListEl.appendChild(grid);
+  }
+
+  // ── Search ────────────────────────────────────────────
+  function setQuery(text) {
+    queryInput.value = text;
+    doSearch();
+  }
+
+  function sortedResults() {
+    var arr = currentResults.slice();
+    if (currentSort === 'imdb') {
+      arr.sort(function(a,b) {
+        var ra = parseFloat((a.rating||'').replace(/[^0-9.]/g,''))||0;
+        var rb = parseFloat((b.rating||'').replace(/[^0-9.]/g,''))||0;
+        return rb - ra;
+      });
+    } else if (currentSort === 'year') {
+      arr.sort(function(a,b) {
+        var ya = parseInt((a.year||'').replace(/[^0-9]/g,'').slice(0,4))||0;
+        var yb = parseInt((b.year||'').replace(/[^0-9]/g,'').slice(0,4))||0;
+        return yb - ya;
+      });
+    }
+    return arr;
+  }
+
+  function renderResultsGrid(summary) {
+    resultsEl.innerHTML = '';
+
+    // Summary title
+    var titleEl = document.createElement('p');
+    titleEl.className = 'section-title';
+    titleEl.textContent = summary || 'Resultados';
+
+    // Sort bar
+    var sortBar = document.createElement('div');
+    sortBar.className = 'sort-bar';
+    sortBar.innerHTML =
+      '<span class="sort-label">Ordenar:</span>' +
+      '<button class="sort-btn' + (currentSort==='imdb'?' active':'') + '" data-sort="imdb">IMDb ↓</button>' +
+      '<button class="sort-btn' + (currentSort==='year'?' active':'') + '" data-sort="year">Año ↓</button>';
+    sortBar.querySelectorAll('.sort-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        currentSort = btn.dataset.sort;
+        renderResultsGrid(resultsEl.querySelector('.section-title') && resultsEl.querySelector('.section-title').textContent);
+      });
+    });
+
+    // Grid
+    var grid = document.createElement('div');
+    grid.className = 'series-grid';
+    sortedResults().forEach(function(s, i) { grid.appendChild(makeCard(s, i)); });
+
+    resultsEl.appendChild(titleEl);
+    resultsEl.appendChild(sortBar);
+    resultsEl.appendChild(grid);
+  }
+
+  async function doSearch() {
+    var query = queryInput.value.trim();
+    if (!query) return;
+
+    viewingMyList = false;
+    searchBtn.disabled = true;
+    searchBtn.textContent = 'Buscando...';
+    welcomeEl.style.display = 'none';
+    myListEl.style.display  = 'none';
+    detailView.classList.remove('open');
+    detailView.innerHTML = '';
+    currentDetailItem = null;
+    listBtn.classList.remove('active');
+    resultsEl.style.display = 'block';
+    resultsEl.innerHTML =
+      '<div class="loading"><div class="film-reel"></div>' +
+      '<p>Buscando series y películas...</p></div>';
+
+    var systemPrompt =
+      'Eres un experto en cine y streaming. El usuario describe un tipo de contenido y tu tarea es hacer una busqueda exhaustiva y recomendar entre 40 y 50 titulos (series O peliculas) que encajen con esa descripcion. ' +
+      (typeFilter === 'serie' ? 'Recomienda SOLO series, no peliculas. ' :
+       typeFilter === 'film'  ? 'Recomienda SOLO peliculas, no series. ' :
+       'Mezcla series y peliculas segun lo que mejor encaje con la peticion. ') +
+      'IMPORTANTE: Cada titulo recomendado debe cumplir claramente con lo que el usuario pide. No incluyas titulos que solo tengan una relacion vaga. Es mejor dar menos resultados muy relevantes que muchos mediocres. ' +
+      'Solo incluye titulos disponibles en Prime Video o HBO Max (o ambas).\n\n' +
+      'Responde SOLO con JSON valido sin markdown:\n' +
+      '{"series":[{"title":"...","year":"...","genres":["..."],"type":"serie|pelicula","platform":"prime|hbo|ambas","rating":"IMDb X.X","url":"URL de busqueda en la plataforma","seasons":2,"episodes":16,"description":"1-2 frases explicando por que encaja."}],"summary":"frase corta max 80 chars"}\n\n' +
+      'El campo seasons y episodes solo aplica a series, para peliculas omitelo. ' +
+      'Para url: si es prime usa https://www.primevideo.com/search?phrase=TITULO_CODIFICADO, si es hbo usa https://www.max.com/search?q=TITULO_CODIFICADO, si es ambas usa primevideo. Reemplaza espacios con + en el titulo. Prioriza calidad sobre cantidad.';
+
+    try {
+      var resp = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 16000,
+          system: systemPrompt,
+          messages: [{ role: 'user', content: query }]
+        })
+      });
+      var data   = await resp.json();
+      var text   = (data.content || []).filter(function (b) { return b.type === 'text'; }).map(function (b) { return b.text; }).join('');
+      var clean  = text.replace(/```json|```/g, '').trim();
+      var parsed = JSON.parse(clean);
+      var series = parsed.series || [];
+      if (!series.length) throw new Error('empty');
+      currentResults = series;
+      currentSort = 'imdb';
+      renderResultsGrid(parsed.summary || 'Resultados');
+
+
+    } catch (_) {
+      resultsEl.innerHTML =
+        '<div class="message-box"><p>No se pudo completar la b&#250;squeda.<br>Int&#233;ntalo de nuevo.</p></div>';
+    } finally {
+      searchBtn.disabled = false;
+      searchBtn.innerHTML = 'Buscar &#8594;';
+    }
+  }
+
+  // ── Detail View ──────────────────────────────────────
+  var detailView = document.getElementById('detailView');
+  var currentDetailItem = null;
+  var detailBackTarget = null; // which area to restore on back
+
+  function openDetail(s, backTarget) {
+    currentDetailItem = s;
+    detailBackTarget  = backTarget || 'results';
+    // Hide all main areas
+    welcomeEl.style.display  = 'none';
+    resultsEl.style.display  = 'none';
+    myListEl.style.display   = 'none';
+    listBtn.classList.remove('active');
+    detailView.classList.add('open');
+    detailView.scrollTop = 0;
+
+    // Render loading state with topbar
+    detailView.innerHTML =
+      '<div class="dp-topbar">' +
+        '<button class="dp-back" id="dpBack">&#8592; Volver a resultados</button>' +
+        '<div class="dp-actions">' +
+          '<button class="save-btn ' + (isSaved(s.title) ? 'saved' : '') + '" id="dpSaveBtn" title="' + (isSaved(s.title) ? 'Quitar de Mi lista' : 'Guardar en Mi lista') + '">' +
+            (isSaved(s.title) ? '&#9733;' : '&#9734;') +
+          '</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="dp-loading">' +
+        '<div class="film-reel"></div>' +
+        '<p>Cargando información detallada…</p>' +
+      '</div>';
+
+    // Wire back button
+    document.getElementById('dpBack').addEventListener('click', closeDetail);
+
+    // Wire save button — find registry key for this item
+    var dpKey = Object.keys(registry).find(function(k){ return registry[k] === s; }) || '';
+    var dpSave = document.getElementById('dpSaveBtn');
+    if (dpKey) dpSave.dataset.key = dpKey;
+
+    fetchDetail(s);
+  }
+
+  async function fetchDetail(s) {
+    var isFilm = s.type === 'pelicula';
+    var typeStr = isFilm ? 'pelicula' : 'serie';
+    var prompt = [
+      'Proporciona informacion detallada sobre la ' + typeStr + ' ' + s.title + ' (' + (s.year||'') + ').',
+      'Responde SOLO con JSON valido sin markdown ni texto adicional:',
+      '{"synopsis":"sinopsis completa en 3-5 frases",',
+      '"director":"director o creador principal",',
+      '"cast":["Actor 1","Actor 2","Actor 3","Actor 4","Actor 5"],',
+      '"awards":"premios y nominaciones mas destacados",',
+      '"trailer_search":"termino de busqueda para YouTube ej: Breaking Bad official trailer",',
+      '"seasons":[{"number":1,"title":"titulo si aplica","description":"resumen breve"}],',
+      '"similar":[{"title":"titulo","platform":"prime|hbo|ambas"}]}',
+      'Para peliculas omite el campo seasons. El campo similar incluye 3-4 titulos parecidos.'
+    ].join(' ');
+    try {
+      var resp = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 1500,
+          messages: [{ role: 'user', content: prompt }]
+        })
+      });
+      var data  = await resp.json();
+      var text  = (data.content||[]).filter(function(b){return b.type==='text';}).map(function(b){return b.text;}).join('');
+      var clean = text.replace(/```json|```/g,'').trim();
+      var d     = JSON.parse(clean);
+      renderDetail(s, d);
+      var b = document.getElementById('dpBack');
+      if (b) b.addEventListener('click', closeDetail);
+    } catch(_) {
+      detailView.innerHTML =
+        '<div class="dp-topbar"><button class="dp-back" id="dpBack">&#8592; Volver a resultados</button></div>' +
+        '<div class="dp-loading"><p>No se pudo cargar el detalle.</p></div>';
+      document.getElementById('dpBack').addEventListener('click', closeDetail);
+    }
+  }
+
+function renderDetail(s, d) {
+    var pill  = PPILL[s.platform] || 'pill-prime';
+    var label = PLABEL[s.platform] || s.platform;
+    var isFilm = s.type === 'pelicula';
+    var saved  = isSaved(s.title);
+    var dpKey  = Object.keys(registry).find(function(k){ return registry[k] === s; }) || '';
+
+    var synopsisHTML =
+      '<div class="dp-section">' +
+        '<div class="dp-section-title">Sinopsis</div>' +
+        '<p class="dp-text">' + esc(d.synopsis || s.description || '') + '</p>' +
+      '</div>';
+
+    var directorHTML = d.director
+      ? '<div class="dp-section">' +
+          '<div class="dp-section-title">' + (isFilm ? 'Director' : 'Creador / Showrunner') + '</div>' +
+          '<p class="dp-text">' + esc(d.director) + '</p>' +
+        '</div>'
+      : '';
+
+    var castHTML = (d.cast && d.cast.length)
+      ? '<div class="dp-section">' +
+          '<div class="dp-section-title">Reparto principal</div>' +
+          '<div class="dp-cast">' +
+            d.cast.map(function(a){ return '<span class="dp-cast-chip">' + esc(a) + '</span>'; }).join('') +
+          '</div>' +
+        '</div>'
+      : '';
+
+    var awardsHTML = d.awards
+      ? '<div class="dp-section">' +
+          '<div class="dp-section-title">Premios</div>' +
+          '<p class="dp-awards">&#127942; ' + esc(d.awards) + '</p>' +
+        '</div>'
+      : '';
+
+    var seasonsHTML = '';
+    if (!isFilm && d.seasons && d.seasons.length) {
+      seasonsHTML =
+        '<div class="dp-section">' +
+          '<div class="dp-section-title">Temporadas</div>' +
+          '<div class="dp-seasons">' +
+            d.seasons.map(function(t){
+              return '<div class="dp-season">' +
+                '<div class="dp-season-title">Temp. ' + esc(String(t.number)) + (t.title ? ' — ' + esc(t.title) : '') + '</div>' +
+                '<div class="dp-season-desc">' + esc(t.description || '') + '</div>' +
+              '</div>';
+            }).join('') +
+          '</div>' +
+        '</div>';
+    }
+
+    var trailerHTML = d.trailer_search
+      ? '<div class="dp-section">' +
+          '<div class="dp-section-title">Tráiler</div>' +
+          '<a class="dp-trailer-btn" href="https://www.youtube.com/results?search_query=' +
+            encodeURIComponent(d.trailer_search) +
+          '" target="_blank" rel="noopener">&#9654; Ver tráiler en YouTube</a>' +
+        '</div>'
+      : '';
+
+    var similarHTML = (d.similar && d.similar.length)
+      ? '<div class="dp-section">' +
+          '<div class="dp-section-title">También te puede gustar</div>' +
+          '<div class="dp-similar">' +
+            d.similar.map(function(x){
+              var xpill  = PPILL[x.platform] || 'pill-prime';
+              var xlabel = PLABEL[x.platform] || x.platform;
+              return '<div class="dp-similar-item">' +
+                '<span>' + esc(x.title) + '</span>' +
+                '<span class="platform-pill ' + xpill + '" style="font-size:0.65rem;padding:2px 8px;">' + esc(xlabel) + '</span>' +
+              '</div>';
+            }).join('') +
+          '</div>' +
+        '</div>'
+      : '';
+
+    var urlEl = s.url
+      ? '<a class="platform-link platform-pill ' + pill + '" href="' + esc(s.url) + '" target="_blank" rel="noopener">' + esc(label) + ' &#8599;</a>'
+      : '<span class="platform-pill ' + pill + '">' + esc(label) + '</span>';
+
+    detailView.innerHTML =
+      '<div class="dp-topbar">' +
+        '<button class="dp-back" id="dpBack">&#8592; Volver a resultados</button>' +
+        '<div class="dp-actions">' +
+          '<button class="save-btn ' + (saved ? 'saved' : '') + '" id="dpSaveBtn" data-key="' + dpKey + '" title="' + (saved ? 'Quitar de Mi lista' : 'Guardar en Mi lista') + '">' +
+            (saved ? '&#9733;' : '&#9734;') +
+          '</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="dp-hero">' +
+        '<div class="dp-platform-wrap">' +
+          urlEl +
+          (s.rating ? '<span class="dp-rating-hero">&#9733; ' + esc(s.rating) + '</span>' : '') +
+          (s.type === 'pelicula'
+            ? '<span class="type-badge type-film">&#127916; Película</span>'
+            : '<span class="type-badge type-serie">&#127902; Serie</span>') +
+          (s.seasons ? '<span class="series-seasons">' + s.seasons + ' temp.</span>' : '') +
+        '</div>' +
+        '<div class="dp-info">' +
+          '<div class="dp-title">' + esc(s.title) + '</div>' +
+          '<div class="dp-meta-row">' +
+            '<span class="dp-year">' + esc(s.year || '') + '</span>' +
+            (s.genres||[]).slice(0,3).map(function(g){ return '<span class="meta-tag">' + esc(g) + '</span>'; }).join('') +
+          '</div>' +
+          synopsisHTML +
+        '</div>' +
+      '</div>' +
+      '<div class="dp-columns">' +
+        '<div class="dp-col">' + castHTML + directorHTML + awardsHTML + '</div>' +
+        '<div class="dp-col">' + seasonsHTML + trailerHTML + similarHTML + '</div>' +
+      '</div>';
+
+    document.getElementById('dpBack').addEventListener('click', closeDetail);
+  }
+
+  function closeDetail() {
+    detailView.classList.remove('open');
+    detailView.innerHTML = '';
+    currentDetailItem = null;
+    if (detailBackTarget === 'mylist') {
+      viewingMyList = true;
+      myListEl.style.display = 'block';
+      listBtn.classList.add('active');
+      renderMyList();
+    } else if (currentResults.length) {
+      resultsEl.style.display = 'block';
+    } else {
+      welcomeEl.style.display = 'flex';
+    }
+  }
+
+    // ── Utils ─────────────────────────────────────────────
+  function esc(str) {
+    return String(str || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  // ── Event listeners ───────────────────────────────────
+  logoBtn.addEventListener('click', showWelcome);
+  listBtn.addEventListener('click', toggleMyList);
+  searchBtn.addEventListener('click', doSearch);
+  queryInput.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') { e.preventDefault(); doSearch(); }
+  });
+  document.querySelectorAll('.welcome-card').forEach(function (card) {
+    card.addEventListener('click', function () {
+      setQuery(card.dataset.q);
+    });
+  });
+
+  // ── Type filter buttons ──────────────────────────────
+  document.querySelectorAll('.type-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      typeFilter = btn.dataset.type;
+      document.querySelectorAll('.type-btn').forEach(function(b) {
+        var isActive = b === btn;
+        b.className = 'type-btn' + (isActive ? ' active' + (typeFilter !== 'all' ? ' active-' + typeFilter : '') : '');
+      });
+    });
+  });
+
+  // ── Init ──────────────────────────────────────────────
+  loadSaved();
+})();
+</script>
+</body>
+</html>
