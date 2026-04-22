@@ -456,7 +456,7 @@
 
   <div class="search-section">
     <div class="input-row">
-      <input type="text" id="query" placeholder="Buscar series y películas en Prime Video y HBO Max…" id="searchInput" />
+      <input type="text" id="query" placeholder="Buscar series y películas en Prime Video y HBO Max…" />
       <div class="type-filter">
         <button class="type-btn active" data-type="all" data-es="Todos" data-en="All">Todos</button>
         <button class="type-btn" data-type="movie" data-es="Películas" data-en="Movies">Películas</button>
@@ -595,7 +595,7 @@
       el.textContent = el.dataset[lang];
     });
     // Search input placeholder
-    var inp = document.getElementById('searchInput');
+    var inp = document.getElementById('query');
     if (inp) inp.placeholder = t('placeholder');
     // Search button
     var sb = document.getElementById('searchBtn');
