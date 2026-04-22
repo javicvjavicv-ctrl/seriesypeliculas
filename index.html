@@ -73,6 +73,18 @@
   .badge-dot { width:4px; height:4px; border-radius:50%; }
   .badge-prime .badge-dot { background:var(--prime); }
   .badge-hbo   .badge-dot { background:var(--hbo); }
+  .lang-btn {
+    display:flex; align-items:center; gap:3px;
+    background:var(--surface); border:1px solid var(--border);
+    color:var(--muted); border-radius:8px; padding:0 10px; height:32px;
+    font-family:'DM Sans',sans-serif; font-size:0.78rem; font-weight:600;
+    cursor:pointer; transition:all 0.18s; letter-spacing:0.04em;
+  }
+  .lang-btn:hover { border-color:rgba(255,255,255,0.2); color:var(--text); }
+  .lang-opt { opacity:0.45; transition:opacity 0.15s; }
+  .lang-opt.active { opacity:1; color:var(--text); }
+  .lang-sep { opacity:0.25; font-weight:300; }
+
   .list-btn {
     display:flex; align-items:center; gap:6px;
     background:var(--surface); border:1px solid var(--border);
@@ -191,43 +203,49 @@
   .result-card {
     background:var(--surface); border:1px solid var(--border);
     border-radius:10px; overflow:hidden;
-    display:grid; grid-template-columns:80px 1fr;
+    display:flex; flex-direction:column;
     transition:border-color 0.2s, transform 0.15s;
     animation:fadeUp 0.3s ease both; cursor:pointer;
   }
   @keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
   .result-card:hover { border-color:rgba(255,255,255,0.13); transform:translateY(-1px); }
 
+  /* Top row: poster + meta + actions */
+  .card-top {
+    display:grid; grid-template-columns:80px 1fr auto;
+    gap:0; align-items:start;
+  }
   .card-poster {
-    width:80px; min-height:110px; flex-shrink:0;
+    width:80px; min-height:110px;
     background:var(--surface2);
     display:flex; align-items:center; justify-content:center;
-    overflow:hidden;
+    overflow:hidden; flex-shrink:0; align-self:stretch;
   }
   .card-poster img { width:100%; height:100%; object-fit:cover; display:block; }
   .card-poster-ph { font-size:1.8rem; opacity:0.2; }
 
-  .card-body {
-    padding:10px 12px 10px;
-    display:grid; grid-template-columns:1fr auto;
-    gap:8px; align-items:start; min-width:0;
-  }
-  .card-main { min-width:0; }
+  .card-main { padding:10px 10px 8px; min-width:0; }
   .card-title {
     font-family:'Playfair Display',serif; font-size:0.95rem; font-weight:700;
-    line-height:1.2; margin-bottom:4px;
-    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+    line-height:1.2; margin-bottom:5px;
   }
-  .card-meta { display:flex; gap:5px; flex-wrap:wrap; margin-bottom:5px; align-items:center; }
+  .card-meta { display:flex; gap:5px; flex-wrap:wrap; align-items:center; }
   .meta-tag {
     font-size:0.65rem; font-weight:500; padding:2px 7px; border-radius:10px;
     background:var(--surface2); color:var(--muted); border:1px solid var(--border);
   }
-  .card-overview {
-    font-size:0.78rem; color:rgba(240,238,232,0.65); line-height:1.5;
-    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+  .card-right {
+    padding:10px 12px 8px;
+    display:flex; flex-direction:column; align-items:flex-end; gap:6px; flex-shrink:0;
   }
-  .card-right { display:flex; flex-direction:column; align-items:flex-end; gap:6px; flex-shrink:0; }
+
+  /* Bottom: description full width */
+  .card-overview {
+    padding:0 12px 12px;
+    font-size:0.8rem; color:rgba(240,238,232,0.68); line-height:1.6;
+    display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden;
+    border-top:1px solid var(--border); padding-top:8px; margin-top:2px;
+  }
   .platform-pill {
     font-size:0.65rem; font-weight:600; letter-spacing:0.04em;
     text-transform:uppercase; padding:3px 8px; border-radius:20px; white-space:nowrap;
@@ -263,18 +281,27 @@
   .dv-topbar {
     display:flex; align-items:center; justify-content:space-between;
     margin-bottom:20px; flex-shrink:0;
+    position:relative;
   }
   .dv-back {
-    background:transparent; border:none; color:var(--muted);
-    font-family:'DM Sans',sans-serif; font-size:0.82rem;
-    cursor:pointer; display:flex; align-items:center; gap:6px;
-    transition:color 0.15s; padding:0;
+    position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
+    background:var(--surface2); border:1px solid rgba(255,255,255,0.15);
+    color:var(--text); font-family:'DM Sans',sans-serif; font-size:0.85rem; font-weight:500;
+    cursor:pointer; display:flex; align-items:center; gap:8px;
+    padding:10px 22px; border-radius:24px;
+    box-shadow:0 4px 20px rgba(0,0,0,0.5);
+    transition:background 0.18s, transform 0.18s, box-shadow 0.18s;
+    z-index:50; white-space:nowrap;
   }
-  .dv-back:hover { color:var(--text); }
+  .dv-back:hover {
+    background:var(--surface); box-shadow:0 6px 28px rgba(0,0,0,0.6);
+    transform:translateX(-50%) translateY(-2px);
+  }
+  .dv-back:active { transform:translateX(-50%) translateY(0); }
 
   .dv-hero {
     display:grid; grid-template-columns:140px 1fr;
-    gap:20px; align-items:start; margin-bottom:24px;
+    gap:20px; align-items:start; margin-bottom:0;
   }
   .dv-poster {
     width:140px; border-radius:8px; overflow:hidden;
@@ -294,7 +321,11 @@
   .dv-meta { display:flex; gap:7px; flex-wrap:wrap; align-items:center; margin-bottom:12px; }
   .dv-year { color:var(--muted); font-size:0.82rem; }
   .dv-rating { font-size:0.85rem; font-weight:600; color:var(--both); }
-  .dv-overview { font-size:0.88rem; color:rgba(240,238,232,0.8); line-height:1.7; margin-bottom:14px; }
+  .dv-overview {
+    font-size:0.88rem; color:rgba(240,238,232,0.8); line-height:1.7;
+    margin:16px 0; padding-top:16px;
+    border-top:1px solid var(--border);
+  }
   .dv-platforms { display:flex; gap:7px; flex-wrap:wrap; margin-bottom:10px; }
   .platform-link { text-decoration:none; transition:opacity 0.18s, transform 0.15s; display:inline-block; }
   .platform-link:hover { opacity:0.75; transform:translateY(-1px); }
@@ -368,11 +399,13 @@
     .type-btn { flex:1; text-align:center; font-size:0.76rem; }
     .welcome-grid { grid-template-columns:repeat(2,1fr); grid-template-rows:repeat(3,1fr); }
     .welcome-card-desc { display:none; }
-    .card-poster { width:64px; }
+    .card-poster { width:64px; min-height:90px; }
+    .card-overview { -webkit-line-clamp:3; }
     .card-title { font-size:0.88rem; }
     .dv-hero { grid-template-columns:100px 1fr; gap:14px; }
     .dv-poster { width:100px; }
     .dv-poster-ph { width:100px; }
+    .dv-overview { margin:12px 0; padding-top:12px; font-size:0.84rem; }
     .dv-columns { grid-template-columns:1fr; }
     .dv-title { font-size:1.2rem; }
   }
@@ -390,7 +423,7 @@
     .search-btn { min-height:44px; }
     .type-btn { min-height:38px; }
     .sort-btn { min-height:36px; padding:6px 12px; }
-    .dv-back { min-height:36px; }
+    .dv-back { bottom:16px; padding:9px 18px; font-size:0.82rem; }
   }
 </style>
 </head>
@@ -409,8 +442,13 @@
         <div class="badge badge-prime"><div class="badge-dot"></div>Prime Video</div>
         <div class="badge badge-hbo"><div class="badge-dot"></div>HBO Max</div>
       </div>
+      <button class="lang-btn" id="langBtn">
+        <span class="lang-opt active" id="langES">ES</span>
+        <span class="lang-sep">/</span>
+        <span class="lang-opt" id="langEN">EN</span>
+      </button>
       <button class="list-btn" id="listBtn">
-        &#9733; Mi lista
+        &#9733; <span class="i18n" data-es="Mi lista" data-en="My list">Mi lista</span>
         <span class="list-count" id="listCount"></span>
       </button>
     </div>
@@ -418,60 +456,60 @@
 
   <div class="search-section">
     <div class="input-row">
-      <input type="text" id="query" placeholder="Buscar series y películas en Prime Video y HBO Max…" />
+      <input type="text" id="query" placeholder="Buscar series y películas en Prime Video y HBO Max…" id="searchInput" />
       <div class="type-filter">
-        <button class="type-btn active" data-type="all">Todos</button>
-        <button class="type-btn" data-type="movie">Películas</button>
-        <button class="type-btn" data-type="series">Series</button>
+        <button class="type-btn active" data-type="all" data-es="Todos" data-en="All">Todos</button>
+        <button class="type-btn" data-type="movie" data-es="Películas" data-en="Movies">Películas</button>
+        <button class="type-btn" data-type="series" data-es="Series" data-en="Series">Series</button>
       </div>
-      <button class="search-btn" id="searchBtn">Buscar &#8594;</button>
+      <button class="search-btn" id="searchBtn" data-es="Buscar →" data-en="Search →">Buscar &#8594;</button>
     </div>
   </div>
 
   <div class="main">
     <div class="welcome" id="welcomeState">
-      <p class="welcome-label">Explorar por categoría</p>
+      <p class="welcome-label i18n" data-es="Explorar por categoría" data-en="Browse by category">Explorar por categoría</p>
       <div class="welcome-grid">
-        <div class="welcome-card" data-genre="80" data-label="Crimen &amp; Detectives">
+        <div class="welcome-card" data-genre="80" data-label="Crimen &amp; Detectives" data-label-en="Crime &amp; Detectives">
           <div class="welcome-card-icon">&#128269;</div>
           <div class="welcome-card-text">
-            <div class="welcome-card-title">Crimen &amp; Detectives</div>
-            <div class="welcome-card-desc">Investigaciones que enganchan</div>
+            <div class="welcome-card-title"><span class="i18n" data-es="Crimen &amp; Detectives" data-en="Crime &amp; Detectives">Crimen &amp; Detectives</span></div>
+            <div class="welcome-card-desc"><span class="i18n" data-es="Investigaciones que enganchan" data-en="Gripping investigations">Investigaciones que enganchan</span></div>
           </div>
         </div>
-        <div class="welcome-card" data-genre="36" data-label="Dramas Históricos">
+        <div class="welcome-card" data-genre="36" data-label="Dramas Históricos" data-label-en="Historical Dramas">
           <div class="welcome-card-icon">&#127963;</div>
           <div class="welcome-card-text">
-            <div class="welcome-card-title">Dramas Históricos</div>
-            <div class="welcome-card-desc">Épocas pasadas con gran producción</div>
+            <div class="welcome-card-title"><span class="i18n" data-es="Dramas Históricos" data-en="Historical Dramas">Dramas Históricos</span></div>
+            <div class="welcome-card-desc"><span class="i18n" data-es="Épocas pasadas con gran producción" data-en="Past eras with grand production">Épocas pasadas con gran producción</span></div>
           </div>
         </div>
-        <div class="welcome-card" data-genre="35" data-label="Comedia">
+        <div class="welcome-card" data-genre="35" data-label="Comedia" data-label-en="Comedy">
           <div class="welcome-card-icon">&#127917;</div>
           <div class="welcome-card-text">
-            <div class="welcome-card-title">Comedia</div>
-            <div class="welcome-card-desc">Humor con profundidad</div>
+            <div class="welcome-card-title"><span class="i18n" data-es="Comedia" data-en="Comedy">Comedia</span></div>
+            <div class="welcome-card-desc"><span class="i18n" data-es="Humor con profundidad" data-en="Humor with depth">Humor con profundidad</span></div>
           </div>
         </div>
-        <div class="welcome-card" data-genre="28" data-label="Acción &amp; Aventura">
+        <div class="welcome-card" data-genre="28" data-label="Acción &amp; Aventura" data-label-en="Action &amp; Adventure">
           <div class="welcome-card-icon">&#9889;</div>
           <div class="welcome-card-text">
-            <div class="welcome-card-title">Acción &amp; Aventura</div>
-            <div class="welcome-card-desc">Adrenalina y espectáculo</div>
+            <div class="welcome-card-title"><span class="i18n" data-es="Acción &amp; Aventura" data-en="Action &amp; Adventure">Acción &amp; Aventura</span></div>
+            <div class="welcome-card-desc"><span class="i18n" data-es="Adrenalina y espectáculo" data-en="Adrenaline and spectacle">Adrenalina y espectáculo</span></div>
           </div>
         </div>
-        <div class="welcome-card" data-genre="99" data-label="Documentales">
+        <div class="welcome-card" data-genre="99" data-label="Documentales" data-label-en="Documentaries">
           <div class="welcome-card-icon">&#127916;</div>
           <div class="welcome-card-text">
-            <div class="welcome-card-title">Documentales</div>
-            <div class="welcome-card-desc">Realidad más rara que la ficción</div>
+            <div class="welcome-card-title"><span class="i18n" data-es="Documentales" data-en="Documentaries">Documentales</span></div>
+            <div class="welcome-card-desc"><span class="i18n" data-es="Realidad más rara que la ficción" data-en="Reality stranger than fiction">Realidad más rara que la ficción</span></div>
           </div>
         </div>
-        <div class="welcome-card" data-genre="27" data-label="Terror">
+        <div class="welcome-card" data-genre="27" data-label="Terror" data-label-en="Horror">
           <div class="welcome-card-icon">&#128065;</div>
           <div class="welcome-card-text">
-            <div class="welcome-card-title">Terror &amp; Horror</div>
-            <div class="welcome-card-desc">Miedo que te persigue días después</div>
+            <div class="welcome-card-title"><span class="i18n" data-es="Terror &amp; Horror" data-en="Horror &amp; Terror">Terror &amp; Horror</span></div>
+            <div class="welcome-card-desc"><span class="i18n" data-es="Miedo que te persigue días después" data-en="Fear that haunts you for days">Miedo que te persigue días después</span></div>
           </div>
         </div>
       </div>
@@ -489,27 +527,112 @@
   // ── API KEYS ─────────────────────────────────────────
   var TMDB_TOKEN   = 'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI4ZmM5YmNiNWFjMGYwYmEzYTRlYjgyYzVlNjg2M2Q2YSIsIm5iZiI6MTc3Njc4Njc2Ni41Nywic3ViIjoiNjllNzlkNGU5OTYzZDlkZDEyMDNlYWZmIiwic2NvcGVzIjpbImFwaV9yZWFkIl0sInZlcnNpb24iOjF9.zlViik4NVgtPXLjITH_9Y36jO-TECJuOIakmdiCB-UA';
   var RAPID_KEY    = 'a25def76dbmsh2cde20a6badb891p14ea11jsn693d13c99e22';
-  var COUNTRY      = 'es';  // change to 'us', 'gb', etc. if needed
+  var COUNTRY      = 'es';
+
+  // ── i18n ─────────────────────────────────────────────
+  var lang = 'es';
+
+  var I18N = {
+    es: {
+      placeholder   : 'Buscar series y películas en Prime Video y HBO Max…',
+      searchBtn     : 'Buscar →',
+      myList        : 'Mi lista',
+      listEmpty     : 'Tu lista está vacía.<br>Pulsa ☆ para guardar.',
+      listTitle     : function(n){ return t('listTitle')(n); },
+      searchingTitles: 'Buscando títulos…',
+      searchingAvail : 'Verificando disponibilidad… ',
+      noResults     : 'No se encontraron resultados en Prime Video o HBO Max.',
+      errorSearch   : t('errorSearch'),
+      loadingDetail : t('loadingDetail'),
+      errorDetail   : t('errorDetail'),
+      backBtn       : '← Volver',
+      saveAdd       : 'Guardar en Mi lista',
+      saveRemove    : 'Quitar de Mi lista',
+      inPrimeHbo    : ' en Prime/HBO',
+      results       : ' resultados',
+      seasons       : t('seasons'), cast:t('cast'), director:'Director',
+      creator:'Creador', genres:t('genres'), similar:t('similar'),
+      noAvail       : t('noAvail'),
+      serie:'Serie', pelicula:'Película',
+      verifying     : 'Verificando disponibilidad en Prime y HBO…',
+      tmdbLang      : 'es-ES'
+    },
+    en: {
+      placeholder   : 'Search movies and series on Prime Video and HBO Max…',
+      searchBtn     : 'Search →',
+      myList        : 'My list',
+      listEmpty     : 'Your list is empty.<br>Tap ☆ to save titles.',
+      listTitle     : function(n){ return 'My list — ' + n + ' title' + (n!==1?'s':''); },
+      searchingTitles: 'Searching titles…',
+      searchingAvail : 'Checking availability… ',
+      noResults     : 'No results found on Prime Video or HBO Max.',
+      errorSearch   : 'Search error. Check your connection.',
+      loadingDetail : 'Loading information…',
+      errorDetail   : 'Could not load information.',
+      backBtn       : '← Back',
+      saveAdd       : 'Save to My list',
+      saveRemove    : 'Remove from My list',
+      inPrimeHbo    : ' on Prime/HBO',
+      results       : ' results',
+      seasons       : 'Seasons', cast:'Cast', director:'Director',
+      creator:'Creator', genres:'Genres', similar:'You might also like',
+      noAvail       : 'Availability not verified',
+      serie:'Series', pelicula:'Movie',
+      verifying     : 'Checking availability on Prime and HBO…',
+      tmdbLang      : 'en-US'
+    }
+  };
+
+  function t(key) { return (I18N[lang] && I18N[lang][key]) || I18N['es'][key] || key; }
+
+  function applyLang() {
+    // Update all i18n spans
+    document.querySelectorAll('.i18n[data-' + lang + ']').forEach(function(el){
+      el.textContent = el.dataset[lang];
+    });
+    // Type buttons
+    document.querySelectorAll('.type-btn[data-' + lang + ']').forEach(function(el){
+      el.textContent = el.dataset[lang];
+    });
+    // Search input placeholder
+    var inp = document.getElementById('searchInput');
+    if (inp) inp.placeholder = t('placeholder');
+    // Search button
+    var sb = document.getElementById('searchBtn');
+    if (sb) sb.textContent = t('searchBtn');
+    // List button text (keep count span)
+    var lb = document.getElementById('listBtn');
+    if (lb) {
+      var countEl = lb.querySelector('.list-count');
+      lb.innerHTML = '&#9733; ' + t('myList') + ' ';
+      if (countEl) lb.appendChild(countEl);
+    }
+    // Lang toggle visual
+    document.getElementById('langES').classList.toggle('active', lang === 'es');
+    document.getElementById('langEN').classList.toggle('active', lang === 'en');
+    // Welcome cards labels
+    document.querySelectorAll('.welcome-card[data-label-en]').forEach(function(card){
+      var labelEl = card.querySelector('.welcome-card-title .i18n') || card.querySelector('.welcome-card-title');
+      if (labelEl && lang === 'en') labelEl.textContent = card.dataset.labelEn;
+      if (labelEl && lang === 'es') labelEl.textContent = card.dataset.label.replace(/&amp;/g,'&');
+    });
+  }
 
   // ── CONSTANTS ────────────────────────────────────────
   var TMDB_IMG  = 'https://image.tmdb.org/t/p/w185';
   var TMDB_ORIG = 'https://image.tmdb.org/t/p/w500';
   var STORAGE_KEY = 'streamfinder-saved-v2';
 
-  var PLATFORM_NAMES = {
-    'amazon'        : 'Prime Video',
-    'prime'         : 'Prime Video',
-    'hbo'           : 'HBO Max',
-    'max'           : 'HBO Max',
-    'hbomax'        : 'HBO Max'
-  };
+  // Any service ID containing these strings = Prime or HBO
+  var PRIME_IDS = ['amazon', 'prime', 'primevideo', 'amazonprime'];
+  var HBO_IDS   = ['hbo', 'max', 'hbomax', 'hbogo', 'hbogoeurope', 'mmax', 'hboeurope', 'warnermedia', 'discovery', 'discoveryplus'];
+
+  function isPrime(id) { var s = (id||'').toLowerCase(); return PRIME_IDS.some(function(k){ return s.includes(k); }); }
+  function isHBO(id)   { var s = (id||'').toLowerCase(); return HBO_IDS.some(function(k){ return s.includes(k); }); }
 
   var PLATFORM_URLS = {
-    'amazon': 'https://www.primevideo.com/search?phrase=',
-    'prime' : 'https://www.primevideo.com/search?phrase=',
-    'hbo'   : 'https://www.max.com/search?q=',
-    'max'   : 'https://www.max.com/search?q=',
-    'hbomax': 'https://www.max.com/search?q='
+    prime : 'https://www.primevideo.com/search?phrase=',
+    hbo   : 'https://www.max.com/search?q='
   };
 
   // TMDB genre IDs — movies & TV share some, diverge on others
@@ -571,47 +694,48 @@
     var platforms = [];
     if (!streamingInfo) return platforms;
 
-    var countryData = streamingInfo[COUNTRY] || streamingInfo['us'] || {};
-    var services = Object.keys(countryData);
+    // streamingInfo is { [country]: [ {service:{id,name}, type, link}, ... ] }
+    var countryArr = streamingInfo[COUNTRY] || streamingInfo['us'] || streamingInfo['es'] || [];
 
-    services.forEach(function(svc) {
-      var key = svc.toLowerCase();
-      if (PLATFORM_NAMES[key]) {
-        if (!platforms.find(function(p){ return p.key === key; })) {
-          platforms.push({
-            key   : key,
-            name  : PLATFORM_NAMES[key],
-            url   : (PLATFORM_URLS[key] || '') + encodeURIComponent(countryData[svc].title || '')
-          });
+    // Handle both array format (new API) and object format (old API)
+    var entries = Array.isArray(countryArr) ? countryArr : Object.entries(countryArr).map(function(e){ return { service:{id:e[0]}, link:'' }; });
+
+    // Debug: log all service IDs so we can see what the API returns
+    console.log('[StreamFinder] Services found:', entries.map(function(o){ return (o.service&&o.service.id)||o.id||'?'; }));
+
+    entries.forEach(function(opt) {
+      var svcId   = (opt.service && (opt.service.id || opt.service.name)) || opt.id || '';
+      var svcName = (opt.service && opt.service.name) || svcId;
+      var link    = opt.link || opt.url || '';
+
+      if (isPrime(svcId) || isPrime(svcName)) {
+        if (!platforms.find(function(p){ return p.type === 'prime'; })) {
+          platforms.push({ type:'prime', name:'Prime Video', pill:'pill-prime', url: link || PLATFORM_URLS.prime });
+        }
+      } else if (isHBO(svcId) || isHBO(svcName)) {
+        if (!platforms.find(function(p){ return p.type === 'hbo'; })) {
+          platforms.push({ type:'hbo', name:'HBO Max', pill:'pill-hbo', url: link || PLATFORM_URLS.hbo });
         }
       }
     });
 
-    // Also check top-level for older API responses
-    if (!platforms.length) {
-      var raw = streamingInfo;
-      ['amazon','prime','hbo','max','hbomax'].forEach(function(key) {
-        if (raw[key] || raw[key.toUpperCase()]) {
-          platforms.push({ key:key, name:PLATFORM_NAMES[key], url:'' });
-        }
-      });
-    }
-
     return platforms;
   }
 
-  function platformPillClass(key) {
-    if (key === 'amazon' || key === 'prime') return 'pill-prime';
-    if (key === 'hbo' || key === 'max' || key === 'hbomax') return 'pill-hbo';
+  function platformPillClass(p) {
+    // accepts either a platform object {type} or a string key
+    var t = (typeof p === 'object') ? p.type : p;
+    if (t === 'prime') return 'pill-prime';
+    if (t === 'hbo')   return 'pill-hbo';
     return 'pill-both';
   }
 
   // ── STREAMING AVAILABILITY API ───────────────────────
   async function getStreamingInfo(tmdbId, mediaType) {
     try {
-      var type = mediaType === 'tv' ? 'show' : 'movie';
+      var type = mediaType === 'tv' ? 'series' : 'movie';
       var url  = 'https://streaming-availability.p.rapidapi.com/shows/' + type + '/' + tmdbId;
-      var resp = await fetch(url + '?country=' + COUNTRY, {
+      var resp = await fetch(url, {
         headers: {
           'X-RapidAPI-Key' : RAPID_KEY,
           'X-RapidAPI-Host': 'streaming-availability.p.rapidapi.com'
@@ -620,36 +744,118 @@
       if (!resp.ok) return null;
       var data = await resp.json();
 
-      // Parse streamingOptions from new API format
-      var options = data.streamingOptions || {};
-      var result  = {};
-      var countryOptions = options[COUNTRY] || options['us'] || [];
+      // New API: { streamingOptions: { [country]: [ {service, type, link} ] } }
+      var options = data.streamingOptions || data.result || {};
+      var countryOptions = options[COUNTRY] || options['us'] || options['es'] || [];
 
-      if (Array.isArray(countryOptions)) {
-        countryOptions.forEach(function(opt) {
-          var svc = (opt.service && opt.service.id) ? opt.service.id.toLowerCase() : '';
-          if (!svc) return;
-          if (!result[svc]) result[svc] = { title: data.title || '' };
-          if (opt.link) result[svc].link = opt.link;
-        });
+      // Return as-is for detectPlatforms to parse
+      if (Array.isArray(countryOptions) && countryOptions.length) {
+        return { [COUNTRY]: countryOptions };
       }
 
-      return Object.keys(result).length ? { [COUNTRY]: result } : null;
-    } catch(_) { return null; }
+      // Fallback: try top-level streamingInfo object
+      if (data[COUNTRY] || data['us']) {
+        return data;
+      }
+
+      return null;
+    } catch(e) {
+      console.warn('Streaming API error:', e);
+      return null;
+    }
+  }
+
+  // ── KEYWORD → GENRE MAPPING ─────────────────────────
+  var KEYWORD_GENRES = {
+    // Crime / thriller
+    'crimen':80, 'crimenes':80, 'crímenes':80, 'criminal':80, 'detective':80, 'detectives':80,
+    'policial':80, 'policiaca':80, 'policiaco':80, 'misterio':9648, 'misterios':9648,
+    'thriller':53, 'suspense':53, 'intriga':53,
+    // Horror
+    'terror':27, 'horror':27, 'miedo':27, 'susto':27,
+    // Action
+    'accion':28, 'acción':28, 'aventura':12, 'aventuras':12, 'superhéroe':28, 'superheroe':28,
+    // Drama / historical
+    'drama':18, 'historico':36, 'histórico':36, 'historia':36, 'periodo':36, 'época':36, 'epico':28,
+    // Comedy
+    'comedia':35, 'humor':35, 'comico':35, 'cómico':35,
+    // Sci-Fi / Fantasy
+    'ciencia ficcion':878, 'scifi':878, 'sci-fi':878, 'ficcion':878, 'ficción':878,
+    'fantasia':14, 'fantasía':14, 'fantástico':14, 'fantastico':14, 'magia':14,
+    // Romance
+    'romance':10749, 'romantica':10749, 'romántica':10749, 'amor':10749,
+    // Documentary
+    'documental':99, 'documentales':99, 'docuserie':99, 'docuseries':99, 'realidad':10764,
+    // War / western
+    'guerra':10752, 'western':37, 'vaqueros':37, 'bélico':10752, 'belico':10752,
+    // Family / animation
+    'animacion':16, 'animación':16, 'infantil':10751, 'familia':10751,
+    // Music
+    'musica':10402, 'música':10402, 'musical':10402
+  };
+
+  function queryToGenreIds(query) {
+    var q = query.toLowerCase().trim();
+    var ids = [];
+    // Try full query first
+    if (KEYWORD_GENRES[q]) ids.push(KEYWORD_GENRES[q]);
+    // Try individual words
+    q.split(/\s+/).forEach(function(word) {
+      var g = KEYWORD_GENRES[word];
+      if (g && !ids.includes(g)) ids.push(g);
+    });
+    return ids;
   }
 
   // ── TMDB SEARCH ──────────────────────────────────────
   async function searchTMDB(query, page) {
     var mediaType = typeFilter === 'movie' ? 'movie' : typeFilter === 'series' ? 'tv' : 'multi';
-    var url = 'https://api.themoviedb.org/3/search/' + mediaType
-            + '?query=' + encodeURIComponent(query)
-            + '&language=es-ES'
-            + '&page=' + (page || 1)
-            + '&include_adult=false';
+    var types = typeFilter === 'movie' ? ['movie'] : typeFilter === 'series' ? ['tv'] : ['movie', 'tv'];
 
-    var resp = await fetch(url, { headers: { 'Authorization': 'Bearer ' + TMDB_TOKEN } });
-    if (!resp.ok) throw new Error('TMDB error ' + resp.status);
-    return resp.json();
+    // Run text search in parallel with genre-based discover (if keywords match)
+    var genreIds = queryToGenreIds(query);
+
+    var promises = [];
+
+    // 1. Text search
+    var textUrl = 'https://api.themoviedb.org/3/search/' + mediaType
+      + '?query=' + encodeURIComponent(query)
+      + '&language=' + t('tmdbLang') + '&page=' + (page || 1) + '&include_adult=false';
+    promises.push(
+      fetch(textUrl, { headers: { 'Authorization': 'Bearer ' + TMDB_TOKEN } })
+        .then(function(r){ return r.ok ? r.json() : { results:[] }; })
+        .catch(function(){ return { results:[] }; })
+    );
+
+    // 2. Discover by matching genres (if any found)
+    if (genreIds.length) {
+      genreIds.slice(0,2).forEach(function(gid) {
+        types.forEach(function(t) {
+          var discUrl = 'https://api.themoviedb.org/3/discover/' + t
+            + '?with_genres=' + gid
+            + '&language=es-ES&sort_by=vote_average.desc&vote_count.gte=50&page=' + (page || 1);
+          promises.push(
+            fetch(discUrl, { headers: { 'Authorization': 'Bearer ' + TMDB_TOKEN } })
+              .then(function(r){ return r.ok ? r.json().then(function(d){ (d.results||[]).forEach(function(x){ x._mediaType = t; }); return d; }) : { results:[] }; })
+              .catch(function(){ return { results:[] }; })
+          );
+        });
+      });
+    }
+
+    var allData = await Promise.all(promises);
+
+    // Merge and deduplicate by id
+    var seen = {};
+    var merged = [];
+    allData.forEach(function(d) {
+      (d.results || []).forEach(function(r) {
+        if (r.media_type === 'person') return;
+        if (!seen[r.id]) { seen[r.id] = true; merged.push(r); }
+      });
+    });
+
+    return { results: merged, total_pages: allData[0].total_pages || 1, total_results: merged.length };
   }
 
   async function discoverTMDB(genreId, page) {
@@ -661,7 +867,7 @@
       var t = types[i];
       var url = 'https://api.themoviedb.org/3/discover/' + t
               + '?with_genres=' + genreId
-              + '&language=es-ES'
+              + '&language=' + t('tmdbLang')
               + '&sort_by=vote_average.desc'
               + '&vote_count.gte=100'
               + '&page=' + (page || 1);
@@ -700,17 +906,18 @@
 
     var div = document.createElement('div');
     div.className = 'result-card';
+    div.dataset.key = key;
     div.style.animationDelay = Math.min(i * 0.04, 0.6) + 's';
 
     div.innerHTML =
-      '<div class="card-poster">' +
-        (poster
-          ? '<img src="' + poster + '" alt="" loading="lazy">'
-          : '<span class="card-poster-ph">&#127916;</span>') +
-      '</div>' +
-      '<div class="card-body">' +
+      '<div class="card-top">' +
+        '<div class="card-poster">' +
+          (poster
+            ? '<img src="' + poster + '" alt="" loading="lazy">'
+            : '<span class="card-poster-ph">&#127916;</span>') +
+        '</div>' +
         '<div class="card-main">' +
-          '<div class="card-title detail-trigger" data-key="' + key + '">' + esc(title) + '</div>' +
+          '<div class="card-title">' + esc(title) + '</div>' +
           '<div class="card-meta">' +
             (year ? '<span class="meta-tag">' + year + '</span>' : '') +
             genreNames +
@@ -718,7 +925,6 @@
               (isTV ? '&#127902; Serie' : '&#127916; Peli') +
             '</span>' +
           '</div>' +
-          '<p class="card-overview">' + esc(item.overview || '') + '</p>' +
         '</div>' +
         '<div class="card-right">' +
           '<div class="platforms-area" data-key="' + key + '"></div>' +
@@ -727,7 +933,8 @@
             (saved ? '&#9733;' : '&#9734;') +
           '</button>' +
         '</div>' +
-      '</div>';
+      '</div>' +
+      (item.overview ? '<p class="card-overview">' + esc(item.overview) + '</p>' : '');
 
     return div;
   }
@@ -739,9 +946,7 @@
     if (!info) return;
 
     var platforms = detectPlatforms(info);
-    var primOrHbo = platforms.filter(function(p){
-      return ['amazon','prime','hbo','max','hbomax'].includes(p.key);
-    });
+    var primOrHbo = platforms; // already filtered to prime/hbo in detectPlatforms
     if (!primOrHbo.length) return;
 
     item._platforms = primOrHbo;
@@ -750,7 +955,7 @@
     if (!area) return;
 
     area.innerHTML = primOrHbo.map(function(p){
-      var pill = platformPillClass(p.key);
+      var pill = platformPillClass(p);
       return p.url
         ? '<a class="platform-pill platform-link ' + pill + '" href="' + esc(p.url) + '" target="_blank" rel="noopener">' + esc(p.name) + ' &#8599;</a>'
         : '<span class="platform-pill ' + pill + '">' + esc(p.name) + '</span>';
@@ -779,7 +984,7 @@
     totalPages     = pages || totalPages;
 
     if (!currentResults.length) {
-      resultsEl.innerHTML = '<div class="message-box"><div class="msg-icon">&#128269;</div><p>No se encontraron resultados.<br>Prueba con otra búsqueda.</p></div>';
+      resultsEl.innerHTML = '<div class="message-box"><div class="msg-icon">&#128269;</div><p>' + t('noResults') + '</p></div>';
       return;
     }
 
@@ -845,11 +1050,19 @@
 
     showView('results');
 
-    // Enrich with streaming info in background (throttled)
-    var delay = 0;
+    // Platforms already set on items — render them immediately
     cards.forEach(function(c){
-      setTimeout(function(){ enrichCard(c.item, c.key); }, delay);
-      delay += 150;
+      if (c.item._platforms && c.item._platforms.length) {
+        var area = document.querySelector('.platforms-area[data-key="' + c.key + '"]');
+        if (area) {
+          area.innerHTML = c.item._platforms.map(function(p){
+            var pill = platformPillClass(p);
+            return p.url
+              ? '<a class="platform-pill platform-link ' + pill + '" href="' + esc(p.url) + '" target="_blank" rel="noopener">' + esc(p.name) + ' &#8599;</a>'
+              : '<span class="platform-pill ' + pill + '">' + esc(p.name) + '</span>';
+          }).join('');
+        }
+      }
     });
   }
 
@@ -863,11 +1076,11 @@
 
     searchBtn.disabled = true;
     searchBtn.textContent = 'Buscando…';
-
-    resultsEl.innerHTML = '<div class="loading"><div class="film-reel"></div><p>Buscando en catálogo real…</p></div>';
     showView('results');
 
     try {
+      // Step 1: fetch TMDB results
+      resultsEl.innerHTML = '<div class="loading"><div class="film-reel"></div><p>Buscando títulos…</p></div>';
       var data;
       if (lastSearchParams.type === 'query') {
         data = await searchTMDB(lastSearchParams.query, page);
@@ -875,29 +1088,45 @@
         data = await discoverTMDB(lastSearchParams.genreId, page);
       }
 
-      var items = (data.results || []).filter(function(r){
-        return r.media_type !== 'person';
-      });
-
-      // Tag media type for multi-search results
+      var items = (data.results || []).filter(function(r){ return r.media_type !== 'person'; });
       items.forEach(function(r){
-        if (!r.media_type && !r._mediaType) {
-          r._mediaType = r.title ? 'movie' : 'tv';
-        }
+        if (!r.media_type && !r._mediaType) r._mediaType = r.title ? 'movie' : 'tv';
       });
 
-      renderResultsGrid(
-        lastSearchParams.type === 'genre'
-          ? lastSearchParams.label
-          : '"' + lastSearchParams.query + '" — ' + (data.total_results || items.length) + ' resultados',
-        items,
-        data.page || 1,
-        Math.min(data.total_pages || 1, 20)
-      );
+      if (!items.length) {
+        resultsEl.innerHTML = '<div class="message-box"><div class="msg-icon">&#128269;</div><p>No se encontraron resultados.</p></div>';
+        return;
+      }
+
+      // Step 2: check streaming availability for each item, filter to Prime/HBO only
+      resultsEl.innerHTML = '<div class="loading"><div class="film-reel"></div><p>' + t('verifying') + ' (0/' + items.length + ')</p></div>';
+
+      var filtered = [];
+      for (var i = 0; i < items.length; i++) {
+        var item = items[i];
+        var isTV = item.media_type === 'tv' || item._mediaType === 'tv';
+
+        // Update progress
+        var loadingP = resultsEl.querySelector('.loading p');
+        if (loadingP) loadingP.textContent = t('searchingAvail') + '(' + (i+1) + '/' + items.length + ')';
+
+        var info = await getStreamingInfo(item.id, isTV ? 'tv' : 'movie');
+        var platforms = info ? detectPlatforms(info) : [];
+
+        if (platforms.length > 0) {
+          item._platforms = platforms;
+          filtered.push(item);
+        }
+      }
+
+      var summary = lastSearchParams.type === 'genre'
+        ? lastSearchParams.label + ' — ' + filtered.length + t('inPrimeHbo')
+        : '"' + lastSearchParams.query + '" — ' + filtered.length + t('inPrimeHbo');
+
+      renderResultsGrid(summary, filtered, data.page || 1, Math.min(data.total_pages || 1, 20));
 
     } catch(e) {
       resultsEl.innerHTML = '<div class="message-box"><p>Error al buscar. Comprueba tu conexión.</p></div>';
-      showView('results');
     } finally {
       searchBtn.disabled = false;
       searchBtn.innerHTML = 'Buscar &#8594;';
@@ -938,7 +1167,7 @@
     // Fetch full TMDB details
     try {
       var endpoint = 'https://api.themoviedb.org/3/' + (isTV?'tv':'movie') + '/' + item.id
-                   + '?language=es-ES'
+                   + '?language=' + t('tmdbLang')
                    + '&append_to_response=credits,similar,videos';
       var resp = await fetch(endpoint, { headers: { 'Authorization': 'Bearer ' + TMDB_TOKEN } });
       var d    = await resp.json();
@@ -947,9 +1176,7 @@
         ? null // already have it
         : await getStreamingInfo(item.id, isTV ? 'tv' : 'movie');
       var platforms = item._platforms || detectPlatforms(streamInfo) || [];
-      var primOrHbo = platforms.filter(function(p){
-        return ['amazon','prime','hbo','max','hbomax'].includes(p.key);
-      });
+      var primOrHbo = platforms; // already filtered to prime/hbo
 
       var poster   = d.poster_path  ? TMDB_ORIG + d.poster_path  : null;
       var backdrop = d.backdrop_path ? 'https://image.tmdb.org/t/p/w780' + d.backdrop_path : null;
@@ -981,7 +1208,7 @@
       // Render full detail
       var platformsHTML = primOrHbo.length
         ? primOrHbo.map(function(p){
-            var pill = platformPillClass(p.key);
+            var pill = platformPillClass(p);
             return p.url
               ? '<a class="platform-pill platform-link ' + pill + '" href="' + esc(p.url) + '" target="_blank" rel="noopener">' + esc(p.name) + ' &#8599;</a>'
               : '<span class="platform-pill ' + pill + '">' + esc(p.name) + '</span>';
@@ -1044,16 +1271,16 @@
               (isTV ? '<span class="type-badge type-serie">&#127902; Serie</span>' : '<span class="type-badge type-film">&#127916; Película</span>') +
               (rating ? '<span class="dv-rating">&#9733; ' + rating + ' ' + votes + '</span>' : '') +
             '</div>' +
-            '<p class="dv-overview">' + esc(d.overview||item.overview||'') + '</p>' +
             '<div class="dv-platforms">' + platformsHTML + '</div>' +
             (trailerHTML) +
           '</div>' +
         '</div>' +
+        ((d.overview||item.overview) ? '<p class="dv-overview">' + esc(d.overview||item.overview||'') + '</p>' : '') +
         '<div class="dv-columns">' +
           '<div class="dv-col">' +
             (genres.length ? '<div class="dv-section-title">Géneros</div><div class="dv-genres">' + genres.map(function(g){ return '<span class="meta-tag">' + esc(g) + '</span>'; }).join('') + '</div>' : '') +
             (castHTML) +
-            ((director||creator) ? '<div class="dv-section-title">' + (isTV?'Creador':'Director') + '</div><p style="font-size:0.86rem;color:rgba(240,238,232,0.8);">' + esc(director||creator) + '</p>' : '') +
+            ((director||creator) ? '<div class="dv-section-title">' + (isTV?t('creator'):t('director')) + '</div><p style="font-size:0.86rem;color:rgba(240,238,232,0.8);">' + esc(director||creator) + '</p>' : '') +
           '</div>' +
           '<div class="dv-col">' +
             seasonsHTML +
@@ -1113,8 +1340,17 @@
 
   // ── EVENT DELEGATION ─────────────────────────────────
   document.addEventListener('click', function(e) {
+    // Save button — handle and stop
     var saveBtn = e.target.closest('.save-btn[data-key]');
     if (saveBtn) { handleSave(saveBtn); return; }
+    // Any click inside a result-card opens detail (except links and save btn)
+    var card = e.target.closest('.result-card[data-key]');
+    if (card && !e.target.closest('a')) {
+      var item = registry[card.dataset.key];
+      if (item) openDetail(item);
+      return;
+    }
+    // Similar items in detail view
     var trigger = e.target.closest('.detail-trigger[data-key]');
     if (trigger) { var item = registry[trigger.dataset.key]; if (item) openDetail(item); }
   });
@@ -1157,9 +1393,18 @@
     return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
+  // ── LANG BUTTON ──────────────────────────────────────
+  document.getElementById('langBtn').addEventListener('click', function(){
+    lang = (lang === 'es') ? 'en' : 'es';
+    applyLang();
+    // Re-search if results are showing
+    if (currentView === 'results' && lastSearchParams) doSearch(currentPage);
+  });
+
   // ── INIT ─────────────────────────────────────────────
   loadSaved();
   showView('welcome');
+  applyLang();
 
 })();
 </script>
