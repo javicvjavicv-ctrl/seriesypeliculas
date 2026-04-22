@@ -830,13 +830,13 @@
     // 2. Discover by matching genres (if any found)
     if (genreIds.length) {
       genreIds.slice(0,2).forEach(function(gid) {
-        types.forEach(function(t) {
-          var discUrl = 'https://api.themoviedb.org/3/discover/' + t
+        types.forEach(function(mtype) {
+          var discUrl = 'https://api.themoviedb.org/3/discover/' + mtype
             + '?with_genres=' + gid
-            + '&language=es-ES&sort_by=vote_average.desc&vote_count.gte=50&page=' + (page || 1);
+            + '&language=' + t('tmdbLang') + '&sort_by=vote_average.desc&vote_count.gte=50&page=' + (page || 1);
           promises.push(
             fetch(discUrl, { headers: { 'Authorization': 'Bearer ' + TMDB_TOKEN } })
-              .then(function(r){ return r.ok ? r.json().then(function(d){ (d.results||[]).forEach(function(x){ x._mediaType = t; }); return d; }) : { results:[] }; })
+              .then(function(r){ return r.ok ? r.json().then(function(d){ (d.results||[]).forEach(function(x){ x._mediaType = mtype; }); return d; }) : { results:[] }; })
               .catch(function(){ return { results:[] }; })
           );
         });
