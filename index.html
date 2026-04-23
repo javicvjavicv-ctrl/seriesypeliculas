@@ -498,34 +498,51 @@ var HBO_IDS=['hbo','max','hbomax','hbogo','hbogoeurope','mmax','hboeurope'];
 function isPrime(s){ var v=(s||'').toLowerCase(); return PRIME_IDS.some(function(k){ return v.indexOf(k)!==-1; }); }
 function isHBO(s){   var v=(s||'').toLowerCase(); return HBO_IDS.some(function(k){ return v.indexOf(k)!==-1; }); }
 
+// TMDB provider IDs for Prime Video and HBO Max
+var PRIME_IDS_TMDB = [9, 119, 10, 1899]; // Amazon Prime Video, Amazon Video, etc.
+var HBO_IDS_TMDB   = [384, 1025, 118, 425, 1185]; // HBO Max, Max, HBO, etc.
+
 async function getStreamingInfo(tmdbId, mediaType){
   var cached = getCached(tmdbId);
-  if(cached !== undefined) return cached; // null = confirmed not available
+  if(cached !== undefined) return cached;
   try{
-    var mtype = mediaType==='tv'?'series':'movie';
-    var r = await fetch('/api/streaming?type='+mtype+'&id='+tmdbId);
+    var endpoint = mediaType==='tv' ? 'tv' : 'movie';
+    var url = 'https://api.themoviedb.org/3/'+endpoint+'/'+tmdbId+'/watch/providers';
+    var r = await fetch(url, { headers:{ 'Authorization':'Bearer '+TMDB_TOKEN } });
     if(!r.ok) return null;
     var data = await r.json();
-    var opts = data.streamingOptions || {};
-    var arr  = opts[COUNTRY] || opts['us'] || [];
-    if(!Array.isArray(arr)) return null;
+    var results = data.results || {};
+    // Try ES first, fallback to US
+    var countryData = results['ES'] || results['US'] || results['GB'] || null;
+    if(!countryData) return null;
+
     var platforms = [];
-    arr.forEach(function(opt){
-      var id   = opt.service && opt.service.id || '';
-      var name = opt.service && opt.service.name || id;
-      var link = opt.link || '';
-      console.log('[SF] svc id='+id+' name='+name);
-      if(isPrime(id)||isPrime(name)){
-        if(!platforms.find(function(p){ return p.type==='prime'; }))
-          platforms.push({ type:'prime', name:'Prime Video', pill:'pill-prime', url:link||'https://www.primevideo.com/search?phrase=' });
-      } else if(isHBO(id)||isHBO(name)){
-        if(!platforms.find(function(p){ return p.type==='hbo'; }))
-          platforms.push({ type:'hbo', name:'HBO Max', pill:'pill-hbo', url:link||'https://www.max.com/search?q=' });
+    // Check flatrate (subscription) providers
+    var providers = (countryData.flatrate || []).concat(countryData.free || []).concat(countryData.ads || []);
+    providers.forEach(function(p){
+      var pid  = p.provider_id;
+      var name = (p.provider_name||'').toLowerCase();
+      if(PRIME_IDS_TMDB.indexOf(pid)!==-1 || name.indexOf('amazon')!==-1 || name.indexOf('prime')!==-1){
+        if(!platforms.find(function(x){ return x.type==='prime'; }))
+          platforms.push({ type:'prime', name:'Prime Video', pill:'pill-prime',
+            url:'https://www.primevideo.com/search?phrase=' });
+      } else if(HBO_IDS_TMDB.indexOf(pid)!==-1 || name.indexOf('hbo')!==-1 || name.indexOf('max')!==-1){
+        if(!platforms.find(function(x){ return x.type==='hbo'; }))
+          platforms.push({ type:'hbo', name:'HBO Max', pill:'pill-hbo',
+            url:'https://www.max.com/search?q=' });
       }
     });
+
+    // Use the link from TMDB if available
+    if(countryData.link){
+      platforms.forEach(function(p){
+        if(!p.url || p.url.indexOf('search')!==-1) p.url = countryData.link;
+      });
+    }
+
     var result = platforms.length ? platforms : null;
     setCached(tmdbId, result);
-    saveStreamCache(); // async, fire and forget
+    saveStreamCache();
     return result;
   }catch(e){ return null; }
 }
