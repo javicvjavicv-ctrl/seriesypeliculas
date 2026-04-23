@@ -10,7 +10,7 @@
   :root {
     --prime:#00A8E1; --hbo:#9B59B6; --both:#E8C547;
     --bg:#0A0A0F; --surface:#12121A; --surface2:#1C1C28;
-    --border:rgba(255,255,255,0.07); --text:#F0EEE8; --muted:#7A7A8A;
+    --border:rgba(255,255,255,0.07); --text:#F0EEE8; --muted:#A0A0B0;
   }
   *{margin:0;padding:0;box-sizing:border-box;}
   html,body{height:100%;overflow:hidden;}
@@ -100,7 +100,7 @@
 
   /* RESULT CARDS */
   .results-grid{display:grid;gap:7px;}
-  .result-card{background:#161620;border:1px solid rgba(255,255,255,0.11);border-radius:10px;overflow:hidden;display:flex;flex-direction:column;transition:border-color 0.2s,transform 0.15s;animation:fadeUp 0.3s ease both;cursor:pointer;}
+  .result-card{background:#181820;border:1px solid rgba(255,255,255,0.14);border-radius:10px;overflow:hidden;display:flex;flex-direction:column;transition:border-color 0.2s,transform 0.15s;animation:fadeUp 0.3s ease both;cursor:pointer;}
   @keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
   .result-card:hover{border-color:rgba(255,255,255,0.13);transform:translateY(-1px);}
   .card-top{display:grid;grid-template-columns:76px 1fr auto;align-items:start;}
@@ -110,21 +110,22 @@
   .card-main{padding:9px 10px 7px;min-width:0;}
   .card-title{font-family:'Playfair Display',serif;font-size:0.93rem;font-weight:700;line-height:1.2;margin-bottom:5px;}
   .card-meta{display:flex;gap:5px;flex-wrap:wrap;align-items:center;}
-  .meta-tag{font-size:0.63rem;font-weight:500;padding:2px 6px;border-radius:10px;background:var(--surface2);color:var(--muted);border:1px solid var(--border);}
+  .meta-tag{font-size:0.63rem;font-weight:500;padding:2px 6px;border-radius:10px;background:var(--surface2);color:#B8B8C8;border:1px solid rgba(255,255,255,0.1);}
   .card-right{padding:9px 11px 7px;display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;}
   .platform-pill{font-size:0.63rem;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;padding:3px 8px;border-radius:20px;white-space:nowrap;}
-  .pill-logo{width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:800;padding:0;flex-shrink:0;}
-  .platforms-area{display:flex;flex-direction:column;gap:4px;align-items:flex-end;}
+  .pill-logo{display:flex;align-items:center;justify-content:center;background:none;border:none;padding:0;flex-shrink:0;}
+  .platforms-area{display:flex;flex-direction:row;gap:5px;align-items:center;}
   .pill-prime{background:rgba(0,168,225,0.1);color:var(--prime);border:1px solid rgba(0,168,225,0.22);}
+  .pill-logo.pill-prime,.pill-logo.pill-hbo{background:none;border:none;}
   .pill-hbo{background:rgba(155,89,182,0.1);color:var(--hbo);border:1px solid rgba(155,89,182,0.22);}
   .type-badge{font-size:0.63rem;font-weight:500;padding:2px 6px;border-radius:10px;white-space:nowrap;}
   .type-serie{background:rgba(0,168,225,0.07);color:var(--prime);border:1px solid rgba(0,168,225,0.18);}
   .type-film{background:rgba(155,89,182,0.07);color:var(--hbo);border:1px solid rgba(155,89,182,0.18);}
   .rating{font-size:0.71rem;color:var(--both);font-weight:600;}
-  .save-btn{background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:5px;width:22px;height:22px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.18s;font-size:0.78rem;flex-shrink:0;}
+  .save-btn{background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:4px;width:18px;height:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.18s;font-size:0.68rem;flex-shrink:0;line-height:1;}
   .save-btn:hover{border-color:rgba(232,197,71,0.5);color:var(--both);}
   .save-btn.saved{background:rgba(232,197,71,0.1);border-color:rgba(232,197,71,0.4);color:var(--both);}
-  .card-overview{padding:0 11px 10px;font-size:0.78rem;color:rgba(240,238,232,0.65);line-height:1.5;border-top:1px solid var(--border);padding-top:7px;margin-top:2px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+  .card-overview{padding:0 11px 10px;font-size:0.78rem;color:rgba(240,238,232,0.82);line-height:1.5;border-top:1px solid rgba(255,255,255,0.09);padding-top:7px;margin-top:2px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;max-height:4.5em;}
   .platform-link{text-decoration:none;transition:opacity 0.18s,transform 0.15s;display:inline-block;}
   .platform-link:hover{opacity:0.75;transform:translateY(-1px);}
 
@@ -815,7 +816,7 @@ function handleSave(btn){
     document.querySelectorAll('.save-btn[data-key="'+btn.dataset.key+'"]').forEach(function(b){ b.classList.add('saved'); b.innerHTML='&#9733;'; });
   }else{
     savedList.splice(idx,1);
-    document.querySelectorAll('.save-btn[data-key="'+btn.dataset.key+'"]').forEach(function(b){ b.classList.remove('saved'); b.innerHTML='&#9734;'; });
+    document.querySelectorAll('.save-btn[data-key="'+btn.dataset.key+'"]').forEach(function(b){ b.classList.remove('saved'); b.innerHTML='&#9734;'; b.style.background=''; b.style.borderColor=''; b.style.color=''; });
     if(view==='mylist'){ var card=btn.closest('.result-card'); if(card){ card.style.opacity='0'; card.style.transition='opacity 0.2s'; setTimeout(renderMyList,220); } }
   }
   savePersist(); updateBadge();
