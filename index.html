@@ -636,9 +636,14 @@ async function doSearch(page){
 
     // Enrich unchecked in background — add to grid as they arrive
     if(unchecked.length){
+      var apiFailCount = 0;
       var enrichPromises = unchecked.map(function(item){
         var isTV = item._mediaType==='tv'||item.media_type==='tv';
         return getStreamingInfo(item.id, isTV?'tv':'movie').then(function(platforms){
+          if(platforms === null && getCached(item.id) === undefined){
+            // API returned error (not cached null), count failures
+            apiFailCount++;
+          }
           if(!platforms) return;
           item._platforms = platforms;
           currentResults.push(item);
@@ -646,7 +651,14 @@ async function doSearch(page){
         });
       });
       Promise.all(enrichPromises).then(function(){
-        if(!currentResults.length){
+        // If streaming API failed for ALL items, show TMDB results without platform filter
+        if(!currentResults.length && apiFailCount === unchecked.length){
+          unchecked.forEach(function(item){ item._platforms = []; });
+          currentResults = unchecked.slice();
+          var fallbackLabel = (lastSearch.type==='genre' ? lastSearch.label : '"'+lastSearch.query+'"')
+            + (lang==='es' ? ' (sin filtro de plataforma)' : ' (platform filter unavailable)');
+          renderGrid(fallbackLabel);
+        } else if(!currentResults.length){
           resultsEl.innerHTML='<div class="message-box"><div class="msg-icon">&#128269;</div><p>'+tr('noResults')+'</p></div>';
         } else {
           renderGrid(makeLabel());
