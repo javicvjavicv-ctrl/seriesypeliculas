@@ -503,9 +503,7 @@ async function getStreamingInfo(tmdbId, mediaType){
   if(cached !== undefined) return cached; // null = confirmed not available
   try{
     var mtype = mediaType==='tv'?'series':'movie';
-    var r = await fetch('https://streaming-availability.p.rapidapi.com/shows/'+mtype+'/'+tmdbId, {
-      headers:{'X-RapidAPI-Key':RAPID_KEY,'X-RapidAPI-Host':'streaming-availability.p.rapidapi.com'}
-    });
+    var r = await fetch('/api/streaming?type='+mtype+'&id='+tmdbId);
     if(!r.ok) return null;
     var data = await r.json();
     var opts = data.streamingOptions || {};
