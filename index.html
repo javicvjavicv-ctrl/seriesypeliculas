@@ -125,7 +125,8 @@
   .save-btn{background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:4px;width:18px;height:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.18s;font-size:0.68rem;flex-shrink:0;line-height:1;}
   .save-btn:hover{border-color:rgba(232,197,71,0.5);color:var(--both);}
   .save-btn.saved{background:rgba(232,197,71,0.1);border-color:rgba(232,197,71,0.4);color:var(--both);}
-  .card-overview{padding:0 11px 10px;font-size:0.78rem;color:rgba(240,238,232,0.82);line-height:1.5;border-top:1px solid rgba(255,255,255,0.09);padding-top:7px;margin-top:2px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;max-height:4.5em;}
+  .card-overview{padding:7px 11px 10px;font-size:0.78rem;color:rgba(240,238,232,0.82);line-height:1.5;border-top:1px solid rgba(255,255,255,0.09);margin-top:2px;}
+  .card-overview-inner{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;max-height:4.5em;}
   .platform-link{text-decoration:none;transition:opacity 0.18s,transform 0.15s;display:inline-block;}
   .platform-link:hover{opacity:0.75;transform:translateY(-1px);}
 
@@ -597,7 +598,7 @@ function makeCard(item, i){
         '<button class="save-btn'+(saved?' saved':'')+'" data-key="'+key+'" title="'+(saved?tr('saveRemove'):tr('saveAdd'))+'">'+(saved?'&#9733;':'&#9734;')+'</button>'+
       '</div>'+
     '</div>'+
-    (item.overview?'<p class="card-overview">'+esc(item.overview)+'</p>':'');
+    (item.overview?'<div class="card-overview"><div class="card-overview-inner">'+esc(item.overview)+'</div></div>':'');
   return div;
 }
 
