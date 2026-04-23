@@ -73,12 +73,12 @@
   .welcome{flex:1;min-height:0;display:flex;flex-direction:column;padding:12px 0 14px;}
   .welcome-label{font-size:0.66rem;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:9px;flex-shrink:0;}
   .welcome-grid{flex:1;min-height:0;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);gap:7px;}
-  .welcome-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:0 14px;cursor:pointer;transition:all 0.18s;display:flex;align-items:center;gap:11px;min-width:0;overflow:hidden;}
+  .welcome-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 10px;cursor:pointer;transition:all 0.18s;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;}
   .welcome-card:hover{border-color:rgba(255,255,255,0.15);background:var(--surface2);}
-  .welcome-card-icon{font-size:1.3rem;flex-shrink:0;}
-  .welcome-card-text{min-width:0;overflow:hidden;}
-  .welcome-card-title{font-size:0.83rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .welcome-card-desc{font-size:0.70rem;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .welcome-card-icon{font-size:1.5rem;flex-shrink:0;line-height:1;}
+  .welcome-card-text{min-width:0;}
+  .welcome-card-title{font-size:0.8rem;font-weight:500;line-height:1.3;white-space:normal;}
+  .welcome-card-desc{font-size:0.68rem;color:var(--muted);margin-top:2px;line-height:1.3;white-space:normal;}
 
   /* SCROLL AREAS */
   .scroll-area{flex:1;min-height:0;overflow-y:auto;padding:12px 0 16px;scrollbar-width:thin;scrollbar-color:var(--surface2) transparent;display:none;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;}
@@ -98,7 +98,7 @@
 
   /* RESULT CARDS */
   .results-grid{display:grid;gap:7px;}
-  .result-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;display:flex;flex-direction:column;transition:border-color 0.2s,transform 0.15s;animation:fadeUp 0.3s ease both;cursor:pointer;}
+  .result-card{background:#161620;border:1px solid rgba(255,255,255,0.11);border-radius:10px;overflow:hidden;display:flex;flex-direction:column;transition:border-color 0.2s,transform 0.15s;animation:fadeUp 0.3s ease both;cursor:pointer;}
   @keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
   .result-card:hover{border-color:rgba(255,255,255,0.13);transform:translateY(-1px);}
   .card-top{display:grid;grid-template-columns:76px 1fr auto;align-items:start;}
@@ -120,7 +120,7 @@
   .save-btn{background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:6px;width:27px;height:27px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.18s;font-size:0.88rem;flex-shrink:0;}
   .save-btn:hover{border-color:rgba(232,197,71,0.5);color:var(--both);}
   .save-btn.saved{background:rgba(232,197,71,0.1);border-color:rgba(232,197,71,0.4);color:var(--both);}
-  .card-overview{padding:0 11px 10px;font-size:0.78rem;color:rgba(240,238,232,0.65);line-height:1.55;border-top:1px solid var(--border);padding-top:7px;margin-top:2px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+  .card-overview{padding:0 11px 10px;font-size:0.78rem;color:rgba(240,238,232,0.65);line-height:1.55;border-top:1px solid var(--border);padding-top:7px;margin-top:2px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;max-height:calc(0.78rem * 1.55 * 3);}
   .platform-link{text-decoration:none;transition:opacity 0.18s,transform 0.15s;display:inline-block;}
   .platform-link:hover{opacity:0.75;transform:translateY(-1px);}
 
@@ -137,8 +137,8 @@
   .detail-view::-webkit-scrollbar-thumb{background:var(--surface2);border-radius:4px;}
   .detail-view.open{display:flex;}
   .dv-topbar{display:flex;align-items:center;justify-content:flex-end;margin-bottom:18px;flex-shrink:0;}
-  .dv-back{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--surface2);border:1px solid rgba(255,255,255,0.15);color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.84rem;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:8px;padding:10px 22px;border-radius:24px;box-shadow:0 4px 20px rgba(0,0,0,0.5);transition:background 0.18s,transform 0.18s,box-shadow 0.18s;z-index:50;white-space:nowrap;}
-  .dv-back:hover{background:var(--surface);box-shadow:0 6px 28px rgba(0,0,0,0.6);transform:translateX(-50%) translateY(-2px);}
+  .dv-back{position:fixed;top:72px;left:24px;transform:none;background:var(--surface2);border:1px solid rgba(255,255,255,0.15);color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.84rem;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:8px;padding:9px 18px;border-radius:24px;box-shadow:0 4px 20px rgba(0,0,0,0.5);transition:background 0.18s,transform 0.18s,box-shadow 0.18s;z-index:50;white-space:nowrap;}
+  .dv-back:hover{background:var(--surface);box-shadow:0 6px 28px rgba(0,0,0,0.6);transform:translateY(-2px);}
   .dv-hero{display:grid;grid-template-columns:130px 1fr;gap:18px;align-items:start;margin-bottom:0;}
   .dv-poster{width:130px;border-radius:8px;overflow:hidden;box-shadow:-3px 3px 0 rgba(0,0,0,0.2),0 8px 24px rgba(0,0,0,0.3);}
   .dv-poster img{width:100%;display:block;}
@@ -188,7 +188,7 @@
     .dv-poster{width:95px;}
     .dv-poster-ph{width:95px;}
     .dv-columns{grid-template-columns:1fr;}
-    .dv-back{bottom:16px;padding:9px 18px;}
+    .dv-back{top:68px;left:12px;padding:8px 14px;font-size:0.8rem;}
   }
   @media(min-width:481px) and (max-width:640px){
     .badges{display:none;}
@@ -310,7 +310,27 @@
 var TMDB_TOKEN = 'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI4ZmM5YmNiNWFjMGYwYmEzYTRlYjgyYzVlNjg2M2Q2YSIsIm5iZiI6MTc3Njc4Njc2Ni41Nywic3ViIjoiNjllNzlkNGU5OTYzZDlkZDEyMDNlYWZmIiwic2NvcGVzIjpbImFwaV9yZWFkIl0sInZlcnNpb24iOjF9.zlViik4NVgtPXLjITH_9Y36jO-TECJuOIakmdiCB-UA';
 var RAPID_KEY  = 'a25def76dbmsh2cde20a6badb891p14ea11jsn693d13c99e22';
 var COUNTRY    = 'es';
-var STORAGE_KEY = 'sf-saved-v3';
+var STORAGE_KEY  = 'sf-saved-v3';
+var STREAM_CACHE_KEY = 'sf-stream-cache-v1';
+var CACHE_TTL = 24 * 60 * 60 * 1000; // 24h in ms
+var streamCache = {}; // in-memory: { [tmdbId]: { platforms, ts } }
+
+async function loadStreamCache(){
+  try{ var r=await window.storage.get(STREAM_CACHE_KEY); streamCache=r?JSON.parse(r.value):{}; }
+  catch(_){ streamCache={}; }
+}
+async function saveStreamCache(){
+  try{ await window.storage.set(STREAM_CACHE_KEY, JSON.stringify(streamCache)); }catch(_){}
+}
+function getCached(id){
+  var entry = streamCache[id];
+  if(!entry) return undefined;
+  if(Date.now()-entry.ts > CACHE_TTL){ delete streamCache[id]; return undefined; }
+  return entry.platforms; // null means "checked, not on Prime/HBO"
+}
+function setCached(id, platforms){
+  streamCache[id] = { platforms: platforms, ts: Date.now() };
+}
 var TMDB_IMG   = 'https://image.tmdb.org/t/p/w185';
 var TMDB_ORIG  = 'https://image.tmdb.org/t/p/w500';
 
@@ -474,6 +494,8 @@ function isPrime(s){ var v=(s||'').toLowerCase(); return PRIME_IDS.some(function
 function isHBO(s){   var v=(s||'').toLowerCase(); return HBO_IDS.some(function(k){ return v.indexOf(k)!==-1; }); }
 
 async function getStreamingInfo(tmdbId, mediaType){
+  var cached = getCached(tmdbId);
+  if(cached !== undefined) return cached; // null = confirmed not available
   try{
     var mtype = mediaType==='tv'?'series':'movie';
     var r = await fetch('https://streaming-availability.p.rapidapi.com/shows/'+mtype+'/'+tmdbId, {
@@ -497,7 +519,10 @@ async function getStreamingInfo(tmdbId, mediaType){
           platforms.push({ type:'hbo', name:'HBO Max', pill:'pill-hbo', url:link||'https://www.max.com/search?q=' });
       }
     });
-    return platforms.length ? platforms : null;
+    var result = platforms.length ? platforms : null;
+    setCached(tmdbId, result);
+    saveStreamCache(); // async, fire and forget
+    return result;
   }catch(e){ return null; }
 }
 
@@ -570,26 +595,56 @@ async function doSearch(page){
     var items = (data.results||[]).filter(function(r){ return r.media_type!=='person'; });
     if(!items.length){ resultsEl.innerHTML='<div class="message-box"><div class="msg-icon">&#128269;</div><p>'+tr('noResults')+'</p></div>'; return; }
 
-    // Verify streaming availability
-    var total = items.length;
-    var filtered = [];
-    for(var i=0;i<items.length;i++){
-      var item = items[i];
+    // Separate cached from unchecked
+    var confirmed = [], unchecked = [];
+    items.forEach(function(item){
       var isTV = item._mediaType==='tv'||item.media_type==='tv';
-      resultsEl.querySelector('.loading p').textContent = tr('verifying')+' ('+( i+1)+'/'+total+')';
-      var platforms = await getStreamingInfo(item.id, isTV?'tv':'movie');
-      if(platforms){ item._platforms=platforms; filtered.push(item); }
-    }
+      var cached = getCached(item.id);
+      if(cached !== undefined){
+        if(cached){ item._platforms=cached; confirmed.push(item); }
+        // null = confirmed not on Prime/HBO, skip
+      } else {
+        unchecked.push(item);
+      }
+    });
 
-    currentResults = filtered;
+    // Show cached results immediately
+    currentResults = confirmed.slice();
     currentPage    = data.page||1;
     totalPages     = Math.min(data.total_pages||1, 20);
 
-    var label = lastSearch.type==='genre'
-      ? lastSearch.label + ' — ' + filtered.length + (lang==='es'?' en Prime/HBO':' on Prime/HBO')
-      : '"'+lastSearch.query+'" — '+filtered.length+(lang==='es'?' en Prime/HBO':' on Prime/HBO');
+    var makeLabel = function(){
+      var n = currentResults.length;
+      return lastSearch.type==='genre'
+        ? lastSearch.label + ' — ' + n + (lang==='es'?' en Prime/HBO':' on Prime/HBO')
+        : '"'+lastSearch.query+'" — '+n+(lang==='es'?' en Prime/HBO':' on Prime/HBO');
+    };
 
-    renderGrid(label);
+    if(confirmed.length){ renderGrid(makeLabel()); }
+    else { resultsEl.innerHTML='<div class="loading"><div class="film-reel"></div><p>'+tr('verifying')+'</p></div>'; }
+
+    // Enrich unchecked in background — add to grid as they arrive
+    if(unchecked.length){
+      var enrichPromises = unchecked.map(function(item){
+        var isTV = item._mediaType==='tv'||item.media_type==='tv';
+        return getStreamingInfo(item.id, isTV?'tv':'movie').then(function(platforms){
+          if(!platforms) return;
+          item._platforms = platforms;
+          currentResults.push(item);
+          renderGrid(makeLabel());
+        });
+      });
+      Promise.all(enrichPromises).then(function(){
+        if(!currentResults.length){
+          resultsEl.innerHTML='<div class="message-box"><div class="msg-icon">&#128269;</div><p>'+tr('noResults')+'</p></div>';
+        } else {
+          renderGrid(makeLabel());
+        }
+        saveStreamCache();
+      });
+    } else if(!confirmed.length){
+      resultsEl.innerHTML='<div class="message-box"><div class="msg-icon">&#128269;</div><p>'+tr('noResults')+'</p></div>';
+    }
   }catch(e){
     resultsEl.innerHTML='<div class="message-box"><p>'+tr('errorSearch')+'</p></div>';
   }finally{
@@ -790,6 +845,7 @@ function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;')
 
 // ── INIT ────────────────────────────────────────────────
 loadSaved();
+loadStreamCache();
 showView('welcome');
 applyLang();
 
