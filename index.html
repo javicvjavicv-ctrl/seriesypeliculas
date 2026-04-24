@@ -368,9 +368,35 @@ langBtn.addEventListener('click',function(){
 // JustWatch GraphQL — fetches titles with platform availability directly
 var JW_API = '/api/justwatch';
 
-var JW_QUERY = 'query SearchTitles($searchTitlesFilter:TitleFilter!,$country:Country!,$language:Language!,$first:Int,$offerTypes:[MonetizationType!]){popularTitles(country:$country,filter:$searchTitlesFilter,first:$first,sortBy:POPULAR){totalCount edges{node{id objectType objectId content(country:$country,language:$language){title originalTitle fullPath posterUrl scoring{imdbScore imdbCount}}offers(country:$country,platform:WEB,filter:{monetizationTypes:$offerTypes}){package{packageId clearName technicalName}standardWebURL}}}}}';
-
-var JW_GENRE_QUERY = 'query BrowseTitles($searchTitlesFilter:TitleFilter!,$country:Country!,$language:Language!,$first:Int,$offerTypes:[MonetizationType!]){popularTitles(country:$country,filter:$searchTitlesFilter,first:$first,sortBy:POPULAR){totalCount edges{node{id objectType objectId content(country:$country,language:$language){title originalTitle fullPath posterUrl scoring{imdbScore imdbCount}}offers(country:$country,platform:WEB,filter:{monetizationTypes:$offerTypes}){package{packageId clearName technicalName}standardWebURL}}}}}';
+var JW_QUERY = `query GetPopularTitles($country: Country!, $language: Language!, $first: Int, $filter: TitleFilter, $priceDrops: Boolean) {
+  popularTitles(country: $country, filter: $filter, first: $first, sortBy: POPULAR, priceDrops: $priceDrops) {
+    totalCount
+    edges {
+      node {
+        id
+        objectType
+        objectId
+        content(country: $country, language: $language) {
+          title
+          originalTitle
+          fullPath
+          posterUrl
+          scoring { imdbScore imdbCount }
+          runtime
+          genres { shortName }
+          productionCountries
+          ... on MovieContent { releaseYear }
+          ... on ShowContent { originalReleaseYear }
+        }
+        offers(country: $country, platform: WEB) {
+          monetizationType
+          standardWebURL
+          package { packageId clearName technicalName icon }
+        }
+      }
+    }
+  }
+}`;
 
 function jwCountry(){ return lang==='en'?'US':'ES'; }
 function jwLang(){    return lang==='en'?'en':'es'; }
@@ -386,62 +412,47 @@ function jwPlatformFilter(){
   return ['prv','amp','hbm','hbp','mxf'];
 }
 
-async function jwSearch(query, page){
-  var filter = { searchQuery: query, monetizationTypes:['FLATRATE','FREE','ADS'] };
-  var typeF = jwTypeFilter();
-  if(typeF) filter.objectTypes = typeF;
-  // Filter to only Prime and HBO packages
-  filter.packages = jwPlatformFilter();
-
+async function jwFetch(filter){
   var body = JSON.stringify({
+    operationName: 'GetPopularTitles',
     query: JW_QUERY,
     variables: {
-      searchTitlesFilter: filter,
       country: jwCountry(),
       language: jwLang(),
       first: 40,
-      offerTypes: ['FLATRATE','FREE','ADS']
+      filter: filter,
+      priceDrops: false
     }
   });
-
   var r = await fetch(JW_API, {
     method:'POST',
-    headers:{'Content-Type':'application/json','App-Version':'3.0.0'},
+    headers:{'Content-Type':'application/json'},
     body: body
   });
   if(!r.ok) throw new Error('JustWatch error '+r.status);
   var data = await r.json();
+  if(data.errors) throw new Error(data.errors[0].message||'GraphQL error');
   return parseJWResults(data);
+}
+
+async function jwSearch(query, page){
+  var filter = {
+    searchQuery: query,
+    packages: jwPlatformFilter()
+  };
+  var typeF = jwTypeFilter();
+  if(typeF) filter.objectTypes = typeF;
+  return jwFetch(filter);
 }
 
 async function jwGenre(genreName, page){
   var filter = {
     genres: [genreName],
-    monetizationTypes:['FLATRATE','FREE','ADS'],
     packages: jwPlatformFilter()
   };
   var typeF = jwTypeFilter();
   if(typeF) filter.objectTypes = typeF;
-
-  var body = JSON.stringify({
-    query: JW_GENRE_QUERY,
-    variables: {
-      searchTitlesFilter: filter,
-      country: jwCountry(),
-      language: jwLang(),
-      first: 40,
-      offerTypes: ['FLATRATE','FREE','ADS']
-    }
-  });
-
-  var r = await fetch(JW_API, {
-    method:'POST',
-    headers:{'Content-Type':'application/json','App-Version':'3.0.0'},
-    body: body
-  });
-  if(!r.ok) throw new Error('JustWatch error '+r.status);
-  var data = await r.json();
-  return parseJWResults(data);
+  return jwFetch(filter);
 }
 
 function parseJWResults(data){
@@ -451,12 +462,15 @@ function parseJWResults(data){
     var c = n.content||{};
     var offers = n.offers||[];
 
-    // Detect platforms
+    // Detect Prime/HBO from offers
     var platforms = [];
     offers.forEach(function(o){
       var pkg = o.package||{};
       var tech = (pkg.technicalName||'').toLowerCase();
       var url = o.standardWebURL||'';
+      // Only flatrate/free (subscription), skip rent/buy
+      var mtype = (o.monetizationType||'').toUpperCase();
+      if(mtype!=='FLATRATE'&&mtype!=='FREE'&&mtype!=='ADS') return;
       if(JW_PRIME.some(function(k){return tech.indexOf(k)!==-1;})){
         if(!platforms.find(function(p){return p.type==='prime';}))
           platforms.push({type:'prime',name:'Prime Video',pill:'pill-prime',url:url||'https://www.primevideo.com'});
@@ -466,23 +480,26 @@ function parseJWResults(data){
       }
     });
 
+    var isTV = n.objectType==='SHOW_TYPE_SERIES' || n.objectType==='SHOW';
+    var year = (c.releaseYear||c.originalReleaseYear||'');
+
     return {
       id: n.objectId || n.id,
       jw_id: n.id,
-      _mediaType: n.objectType==='SHOW_TYPE_SERIES'?'tv':'movie',
+      _mediaType: isTV?'tv':'movie',
       title: c.title||c.originalTitle||'',
       poster_path: null,
       jw_poster: c.posterUrl||null,
       vote_average: c.scoring&&c.scoring.imdbScore||0,
       vote_count: c.scoring&&c.scoring.imdbCount||0,
       overview: '',
-      release_date: '',
-      first_air_date: '',
+      release_date: isTV?'':(year?year+'-01-01':''),
+      first_air_date: isTV?(year?year+'-01-01':''):'',
       genre_ids: [],
       _platforms: platforms,
       _jwPath: c.fullPath||''
     };
-  }).filter(function(item){ return item.title && item._platforms.length>0; });
+  }).filter(function(item){ return item.title; });
 }
 
 // Enrich with TMDB data (poster, overview, year) in background
