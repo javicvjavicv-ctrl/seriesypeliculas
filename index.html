@@ -368,8 +368,8 @@ langBtn.addEventListener('click',function(){
 // JustWatch GraphQL — fetches titles with platform availability directly
 var JW_API = '/api/justwatch';
 
-var JW_QUERY = `query GetPopularTitles($country: Country!, $language: Language!, $first: Int!, $filter: TitleFilter, $priceDrops: Boolean) {
-  popularTitles(country: $country, filter: $filter, first: $first, sortBy: POPULAR, priceDrops: $priceDrops) {
+var JW_QUERY = `query GetPopularTitles($country: Country!, $language: Language!, $first: Int!, $filter: TitleFilter) {
+  popularTitles(country: $country, filter: $filter, first: $first, sortBy: POPULAR) {
     totalCount
     edges {
       node {
@@ -382,10 +382,7 @@ var JW_QUERY = `query GetPopularTitles($country: Country!, $language: Language!,
           fullPath
           posterUrl
           scoring { imdbScore imdbVotes }
-          runtime
           genres { shortName }
-          ... on MovieContent { releaseYear }
-          ... on ShowContent { originalReleaseYear }
         }
         offers(country: $country, platform: WEB) {
           monetizationType
@@ -419,8 +416,7 @@ async function jwFetch(filter){
       country: jwCountry(),
       language: jwLang(),
       first: 40,
-      filter: filter,
-      priceDrops: false
+      filter: filter
     }
   };
   var r = await fetch(JW_API, {
@@ -482,7 +478,7 @@ function parseJWResults(data){
     });
 
     var isTV = n.objectType==='SHOW_TYPE_SERIES' || n.objectType==='SHOW';
-    var year = (c.releaseYear||c.originalReleaseYear||'');
+    var year = '';
 
     return {
       id: n.objectId || n.id,
@@ -494,8 +490,8 @@ function parseJWResults(data){
       vote_average: c.scoring&&c.scoring.imdbScore||0,
       vote_count: c.scoring&&c.scoring.imdbVotes||0,
       overview: '',
-      release_date: isTV?'':(year?year+'-01-01':''),
-      first_air_date: isTV?(year?year+'-01-01':''):'',
+      release_date: '',
+      first_air_date: '',
       genre_ids: [],
       _platforms: platforms,
       _jwPath: c.fullPath||''
