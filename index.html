@@ -366,7 +366,7 @@ langBtn.addEventListener('click',function(){
 
 // ── JUSTWATCH API ───────────────────────────────────────
 // JustWatch GraphQL — fetches titles with platform availability directly
-var JW_API = 'https://apis.justwatch.com/graphql';
+var JW_API = '/api/justwatch';
 
 var JW_QUERY = 'query SearchTitles($searchTitlesFilter:TitleFilter!,$country:Country!,$language:Language!,$first:Int,$offerTypes:[MonetizationType!]){popularTitles(country:$country,filter:$searchTitlesFilter,first:$first,sortBy:POPULAR){totalCount edges{node{id objectType objectId content(country:$country,language:$language){title originalTitle fullPath posterUrl scoring{imdbScore imdbCount}}offers(country:$country,platform:WEB,filter:{monetizationTypes:$offerTypes}){package{packageId clearName technicalName}standardWebURL}}}}}';
 
