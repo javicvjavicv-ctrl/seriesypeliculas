@@ -368,7 +368,7 @@ langBtn.addEventListener('click',function(){
 // JustWatch GraphQL — fetches titles with platform availability directly
 var JW_API = '/api/justwatch';
 
-var JW_QUERY = `query GetPopularTitles($country: Country!, $language: Language!, $first: Int, $filter: TitleFilter, $priceDrops: Boolean) {
+var JW_QUERY = `query GetPopularTitles($country: Country!, $language: Language!, $first: Int!, $filter: TitleFilter, $priceDrops: Boolean) {
   popularTitles(country: $country, filter: $filter, first: $first, sortBy: POPULAR, priceDrops: $priceDrops) {
     totalCount
     edges {
@@ -381,17 +381,16 @@ var JW_QUERY = `query GetPopularTitles($country: Country!, $language: Language!,
           originalTitle
           fullPath
           posterUrl
-          scoring { imdbScore imdbCount }
+          scoring { imdbScore imdbVotes }
           runtime
           genres { shortName }
-          productionCountries
           ... on MovieContent { releaseYear }
           ... on ShowContent { originalReleaseYear }
         }
         offers(country: $country, platform: WEB) {
           monetizationType
           standardWebURL
-          package { packageId clearName technicalName icon }
+          package { packageId clearName technicalName }
         }
       }
     }
@@ -430,10 +429,6 @@ async function jwFetch(filter){
     body: JSON.stringify(payload)
   });
   var data = await r.json();
-  // Show diagnostic if worker returns debug info
-  if(data.status !== undefined && data.response !== undefined) {
-    throw new Error('Diagnóstico — HTTP '+data.status+': '+data.response.slice(0,300));
-  }
   if(!r.ok) throw new Error('JustWatch error '+r.status);
   if(data.errors) throw new Error(data.errors[0].message||'GraphQL error');
   return parseJWResults(data);
@@ -495,7 +490,7 @@ function parseJWResults(data){
       poster_path: null,
       jw_poster: c.posterUrl||null,
       vote_average: c.scoring&&c.scoring.imdbScore||0,
-      vote_count: c.scoring&&c.scoring.imdbCount||0,
+      vote_count: c.scoring&&c.scoring.imdbVotes||0,
       overview: '',
       release_date: isTV?'':(year?year+'-01-01':''),
       first_air_date: isTV?(year?year+'-01-01':''):'',
